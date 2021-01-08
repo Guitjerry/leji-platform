@@ -300,6 +300,13 @@ public class PmsProductServiceImpl implements PmsProductService {
         return productMapper.selectByExample(productExample);
     }
 
+    @Override
+    public List<PmsProduct> listByBrandId(Long brandId) {
+        PmsProductExample example = new PmsProductExample();
+        example.or().andBrandIdEqualTo(brandId);
+        return productMapper.selectByExample(example);
+    }
+
     /**
      * 建立和插入关系表操作
      *
