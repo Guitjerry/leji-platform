@@ -71,11 +71,11 @@ public class SmsHomeRecommendProductController {
     @ApiOperation("分页查询推荐")
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     @ResponseBody
-    public CommonResult<CommonPage<SmsHomeRecommendProductDto>> list(@RequestParam(value = "productName", required = false) String productName,
+    public CommonResult<CommonPage<SmsHomeRecommendProduct>> list(@RequestParam(value = "productName", required = false) String productName,
                                                                   @RequestParam(value = "recommendStatus", required = false) Integer recommendStatus,
                                                                   @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
                                                                   @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
-        List<SmsHomeRecommendProductDto> smsHomeRecommendProductDtos = recommendProductService.list(productName, recommendStatus, pageSize, pageNum);
+        List<SmsHomeRecommendProduct> smsHomeRecommendProductDtos = recommendProductService.list(productName, recommendStatus, pageSize, pageNum);
         return CommonResult.success(CommonPage.restPage(smsHomeRecommendProductDtos));
     }
 }

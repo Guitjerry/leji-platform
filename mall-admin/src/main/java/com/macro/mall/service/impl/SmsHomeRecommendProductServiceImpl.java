@@ -74,8 +74,22 @@ public class SmsHomeRecommendProductServiceImpl implements SmsHomeRecommendProdu
     }
 
     @Override
-    public List<SmsHomeRecommendProductDto> list(String productName, Integer recommendStatus, Integer pageSize, Integer pageNum) {
+    public List<SmsHomeRecommendProduct> list(String productName, Integer recommendStatus, Integer pageSize, Integer pageNum) {
         PageHelper.startPage(pageNum,pageSize);
+        SmsHomeRecommendProductExample example = new SmsHomeRecommendProductExample();
+        SmsHomeRecommendProductExample.Criteria criteria = example.createCriteria();
+        if(!StringUtils.isEmpty(productName)){
+            criteria.andProductNameLike("%"+productName+"%");
+        }
+        if(recommendStatus!=null){
+            criteria.andRecommendStatusEqualTo(recommendStatus);
+        }
+        example.setOrderByClause("sort desc");
+        return recommendProductMapper.selectByExample(example);
+    }
+
+    @Override
+    public List<SmsHomeRecommendProductDto> listWx(String productName, Integer recommendStatus) {
         SmsHomeRecommendProductExample example = new SmsHomeRecommendProductExample();
         SmsHomeRecommendProductExample.Criteria criteria = example.createCriteria();
         if(!StringUtils.isEmpty(productName)){

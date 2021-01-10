@@ -35,5 +35,14 @@ public interface SmsHomeNewProductService {
     /**
      * 查询新品推荐
      */
-    List<SmsHomeNewProductDto> list(String productName, Integer recommendStatus, Integer pageSize, Integer pageNum) ;
+    List<SmsHomeNewProduct> list(String productName, Integer recommendStatus, Integer pageSize, Integer pageNum) ;
+
+    /**
+     * 微信新品推荐
+     * @param productName
+     * @param recommendStatus
+     * @return
+     */
+    List<SmsHomeNewProductDto> listWx(String productName, Integer recommendStatus);
+
 }

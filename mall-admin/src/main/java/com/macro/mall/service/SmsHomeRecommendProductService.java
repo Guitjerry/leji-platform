@@ -35,5 +35,7 @@ public interface SmsHomeRecommendProductService {
     /**
      * 分页查询推荐
      */
-    List<SmsHomeRecommendProductDto> list(String productName, Integer recommendStatus, Integer pageSize, Integer pageNum);
+    List<SmsHomeRecommendProduct> list(String productName, Integer recommendStatus,Integer pageSize, Integer pageNum);
+    List<SmsHomeRecommendProductDto> listWx(String productName, Integer recommendStatus);
+
 }

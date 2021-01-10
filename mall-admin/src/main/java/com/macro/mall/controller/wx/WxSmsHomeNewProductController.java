@@ -27,10 +27,8 @@ public class WxSmsHomeNewProductController {
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     @ResponseBody
     public CommonResult<List<SmsHomeNewProductDto>> list(@RequestParam(value = "productName", required = false) String productName,
-                                                         @RequestParam(value = "recommendStatus", required = false) Integer recommendStatus,
-                                                         @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
-                                                         @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
-        List<SmsHomeNewProductDto> homeBrandList = homeNewProductService.list(productName, recommendStatus, Integer.MAX_VALUE, pageNum);
+                                                         @RequestParam(value = "recommendStatus", required = false) Integer recommendStatus) {
+        List<SmsHomeNewProductDto> homeBrandList = homeNewProductService.listWx(productName, recommendStatus);
         return CommonResult.success(homeBrandList);
     }
 }

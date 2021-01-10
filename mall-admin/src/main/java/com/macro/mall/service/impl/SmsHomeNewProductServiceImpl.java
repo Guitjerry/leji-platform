@@ -75,8 +75,23 @@ public class SmsHomeNewProductServiceImpl implements SmsHomeNewProductService {
     }
 
     @Override
-    public List<SmsHomeNewProductDto> list(String productName, Integer recommendStatus, Integer pageSize, Integer pageNum) {
+    public List<SmsHomeNewProduct> list(String productName, Integer recommendStatus, Integer pageSize, Integer pageNum) {
         PageHelper.startPage(pageNum,pageSize);
+        SmsHomeNewProductExample example = new SmsHomeNewProductExample();
+        SmsHomeNewProductExample.Criteria criteria = example.createCriteria();
+        if(!StringUtils.isEmpty(productName)){
+            criteria.andProductNameLike("%"+productName+"%");
+        }
+        if(recommendStatus!=null){
+            criteria.andRecommendStatusEqualTo(recommendStatus);
+        }
+        example.setOrderByClause("sort desc");
+
+        return homeNewProductMapper.selectByExample(example);
+    }
+
+    @Override
+    public List<SmsHomeNewProductDto> listWx(String productName, Integer recommendStatus) {
         SmsHomeNewProductExample example = new SmsHomeNewProductExample();
         SmsHomeNewProductExample.Criteria criteria = example.createCriteria();
         if(!StringUtils.isEmpty(productName)){

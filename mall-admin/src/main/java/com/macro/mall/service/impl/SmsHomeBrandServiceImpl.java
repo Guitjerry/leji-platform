@@ -74,8 +74,30 @@ public class SmsHomeBrandServiceImpl implements SmsHomeBrandService {
     }
 
     @Override
-    public List<SmsHomeBrandDto> list(String brandName, Integer recommendStatus, Integer pageSize, Integer pageNum) {
+    public List<SmsHomeBrand> list(String brandName, Integer recommendStatus, Integer pageSize, Integer pageNum) {
         PageHelper.startPage(pageNum,pageSize);
+        SmsHomeBrandExample example = new SmsHomeBrandExample();
+        SmsHomeBrandExample.Criteria criteria = example.createCriteria();
+        if(!StringUtils.isEmpty(brandName)){
+            criteria.andBrandNameLike("%"+brandName+"%");
+        }
+        if(recommendStatus!=null){
+            criteria.andRecommendStatusEqualTo(recommendStatus);
+        }
+        example.setOrderByClause("sort desc");
+
+        //品牌推荐
+        return homeBrandMapper.selectByExample(example);
+    }
+
+    /**
+     * 微信小程序查询
+     * @param brandName
+     * @param recommendStatus
+     * @return
+     */
+    @Override
+    public List<SmsHomeBrandDto> listWx(String brandName, Integer recommendStatus) {
         SmsHomeBrandExample example = new SmsHomeBrandExample();
         SmsHomeBrandExample.Criteria criteria = example.createCriteria();
         if(!StringUtils.isEmpty(brandName)){

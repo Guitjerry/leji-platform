@@ -35,5 +35,6 @@ public interface SmsHomeBrandService {
     /**
      * 查询品牌推荐
      */
-    List<SmsHomeBrandDto> list(String brandName, Integer recommendStatus, Integer pageSize, Integer pageNum);
+    List<SmsHomeBrandDto> listWx(String brandName, Integer recommendStatus);
+    List<SmsHomeBrand> list(String brandName, Integer recommendStatus, Integer pageSize, Integer pageNum);
 }
