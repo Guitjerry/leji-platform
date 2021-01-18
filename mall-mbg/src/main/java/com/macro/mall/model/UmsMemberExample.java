@@ -1351,6 +1351,10 @@ public class UmsMemberExample {
             addCriterion("history_integration not between", value1, value2, "historyIntegration");
             return (Criteria) this;
         }
+        public Criteria andOpenIdEqualTo(String openId) {
+            addCriterion("open_id =", openId, "openId");
+            return (Criteria) this;
+        }
     }
 
     public static class Criteria extends GeneratedCriteria {

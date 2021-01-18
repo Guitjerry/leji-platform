@@ -19,6 +19,7 @@
         <module>mall-monitor</module>
         <module>mall-gateway</module>
         <module>mall-auth</module>
+        <module>mall-wechat</module>
     </modules>
 
     <parent>

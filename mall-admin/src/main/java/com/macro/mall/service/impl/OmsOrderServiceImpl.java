@@ -1,11 +1,19 @@
 package com.macro.mall.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.date.DateUtil;
 import com.github.pagehelper.PageHelper;
+import com.macro.mall.common.exception.Asserts;
+import com.macro.mall.constant.CommonConstant;
 import com.macro.mall.dao.OmsOrderDao;
 import com.macro.mall.dao.OmsOrderOperateHistoryDao;
 import com.macro.mall.dto.*;
+import com.macro.mall.enums.OrderStatusTypeEnum;
+import com.macro.mall.enums.PayTypeEnum;
+import com.macro.mall.mapper.OmsCartItemMapper;
 import com.macro.mall.mapper.OmsOrderMapper;
 import com.macro.mall.mapper.OmsOrderOperateHistoryMapper;
+import com.macro.mall.model.OmsCartItem;
 import com.macro.mall.model.OmsOrder;
 import com.macro.mall.model.OmsOrderExample;
 import com.macro.mall.model.OmsOrderOperateHistory;
@@ -13,8 +21,11 @@ import com.macro.mall.service.OmsOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
@@ -31,6 +42,8 @@ public class OmsOrderServiceImpl implements OmsOrderService {
     private OmsOrderOperateHistoryDao orderOperateHistoryDao;
     @Autowired
     private OmsOrderOperateHistoryMapper orderOperateHistoryMapper;
+    @Autowired
+    private OmsCartItemMapper omsCartItemMapper;
 
     @Override
     public List<OmsOrder> list(OmsOrderQueryParam queryParam, Integer pageSize, Integer pageNum) {
@@ -149,5 +162,33 @@ public class OmsOrderServiceImpl implements OmsOrderService {
         history.setNote("修改备注信息："+note);
         orderOperateHistoryMapper.insert(history);
         return count;
+    }
+
+    @Override
+    public int createOrder(OmsOrderPayParam omsOrderPayParam) {
+        OmsOrder omsOrder = new OmsOrder();
+        AtomicReference<Double> totalAmount = new AtomicReference<>(0.0);
+        List<OmsWxAppCart> omsWxAppCarts = omsOrderPayParam.getCarts();
+        if (CollectionUtil.isNotEmpty(omsWxAppCarts)) {
+            Asserts.fail("请选择商品后下单！");
+        }
+        omsWxAppCarts.forEach(omsWxAppCart -> {
+            //购物车
+            OmsCartItem omsCartItem = new OmsCartItem();
+            omsCartItem.setCreateDate(DateUtil.parse(DateUtil.now()));
+            omsCartItem.setPrice(BigDecimal.valueOf(omsWxAppCart.getPrice()));
+            omsCartItem.setProductBrand(String.valueOf(omsWxAppCart.getBrandId()));
+            omsCartItem.setProductName(omsWxAppCart.getProductCategoryName());
+            omsCartItem.setProductCategoryId(Long.valueOf(omsWxAppCart.getProductCategoryId()));
+            omsCartItemMapper.insert(omsCartItem);
+            totalAmount.updateAndGet(v -> v + omsWxAppCart.getPrice());
+        });
+        omsOrder.setOrderSn(UUID.randomUUID().toString());
+        omsOrder.setCreateTime(DateUtil.parse(DateUtil.now()));
+        omsOrder.setTotalAmount(BigDecimal.valueOf(totalAmount.get()));
+        omsOrder.setPayType(PayTypeEnum.NOPAY.getKey());
+        omsOrder.setStatus(OrderStatusTypeEnum.hasComplete.getKey());
+        omsOrder.setOrderType(CommonConstant.FLAG_YES);
+        return orderMapper.insert(omsOrder);
     }
 }

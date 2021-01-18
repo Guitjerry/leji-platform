@@ -1,5 +1,7 @@
 package com.macro.mall.service;
 
+import com.macro.mall.dto.SessionDto;
+
 /**
  * 微信openId相关service
  */
@@ -9,5 +11,5 @@ public interface WechatService {
      * @param code
      * @return
      */
-    String getOpenIdByCode(String code);
+    SessionDto getOpenIdByCode(String code);
 }

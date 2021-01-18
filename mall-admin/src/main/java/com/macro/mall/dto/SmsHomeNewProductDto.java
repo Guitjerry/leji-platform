@@ -51,4 +51,7 @@ public class SmsHomeNewProductDto {
 
     @ApiModelProperty(value = "单位")
     private String unit;
+
+    @ApiModelProperty(value = "是否显示，0不显示 1显示")
+    private Integer isShow;
 }

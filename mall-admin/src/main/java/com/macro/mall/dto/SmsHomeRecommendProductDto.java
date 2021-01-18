@@ -39,7 +39,16 @@ public class SmsHomeRecommendProductDto implements Serializable {
     @ApiModelProperty(value = "单位")
     private String unit;
 
+    private Integer isShow;
     private static final long serialVersionUID = 1L;
+
+    public Integer getIsShow() {
+        return isShow;
+    }
+
+    public void setIsShow(Integer isShow) {
+        this.isShow = isShow;
+    }
 
     public Long getId() {
         return id;

@@ -18,6 +18,7 @@ import com.macro.mall.dto.UpdateAdminPasswordParam;
 import com.macro.mall.mapper.UmsAdminLoginLogMapper;
 import com.macro.mall.mapper.UmsAdminMapper;
 import com.macro.mall.mapper.UmsAdminRoleRelationMapper;
+import com.macro.mall.mapper.UmsMemberMapper;
 import com.macro.mall.model.*;
 import com.macro.mall.service.AuthService;
 import com.macro.mall.service.UmsAdminCacheService;
@@ -51,6 +52,8 @@ public class UmsAdminServiceImpl implements UmsAdminService {
     private UmsAdminRoleRelationDao adminRoleRelationDao;
     @Autowired
     private UmsAdminLoginLogMapper loginLogMapper;
+    @Autowired
+    private UmsMemberMapper memberMapper;
     @Autowired
     private AuthService authService;
     @Autowired

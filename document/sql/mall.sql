@@ -2594,3 +2594,14 @@ INSERT INTO `ums_role_resource_relation` VALUES ('221', '1', '23');
 INSERT INTO `ums_role_resource_relation` VALUES ('222', '1', '24');
 INSERT INTO `ums_role_resource_relation` VALUES ('223', '1', '31');
 INSERT INTO `ums_role_resource_relation` VALUES ('224', '1', '32');
+
+
+-- 2021-01-16
+alter table pms_product
+	add is_show int(1) null comment '未注册时是否可以看到商品价格';
+-- 2021-01-17
+create unique index ums_admin_open_id_uindex
+	on ums_admin (open_id);
+
+alter table ums_member
+	add open_id varchar(100) null comment '小程序openId';

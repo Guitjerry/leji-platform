@@ -1,5 +1,7 @@
 package com.macro.mall.controller.wx;
 
+import cn.hutool.core.util.ObjectUtil;
+import com.google.common.collect.Lists;
 import com.macro.mall.common.api.CommonPage;
 import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.dto.PmsProductParam;
@@ -33,7 +35,12 @@ public class WxPmsProductController {
     public CommonResult<CommonPage<PmsProduct>> getList(PmsProductQueryParam productQueryParam,
                                                         @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
                                                         @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
-        List<PmsProduct> productList = productService.list(productQueryParam, pageSize, pageNum);
+        List<PmsProduct> productList = Lists.newArrayList();
+        if(ObjectUtil.isNotNull(productQueryParam.getType())) {
+            productList  = productService.listByType(productQueryParam.getType(), pageSize, pageNum);
+        }else {
+            productList = productService.list(productQueryParam, pageSize, pageNum);
+        }
         return CommonResult.success(CommonPage.restPage(productList));
     }
 

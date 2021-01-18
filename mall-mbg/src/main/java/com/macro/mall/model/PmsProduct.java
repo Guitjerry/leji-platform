@@ -120,7 +120,18 @@ public class PmsProduct implements Serializable {
     @ApiModelProperty(value = "移动端网页详情")
     private String detailMobileHtml;
 
+    @ApiModelProperty(value = "未注册用户是否可以看到该商品价格 0 看不到 1可以看到")
+    private Integer isShow;
+
     private static final long serialVersionUID = 1L;
+
+    public Integer getIsShow() {
+        return isShow;
+    }
+
+    public void setIsShow(Integer isShow) {
+        this.isShow = isShow;
+    }
 
     public Long getId() {
         return id;

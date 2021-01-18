@@ -72,4 +72,6 @@ public interface PmsProductService {
     List<PmsProduct> list(String keyword);
 
     List<PmsProduct> listByBrandId(Long brandId);
+
+    List<PmsProduct> listByType(Integer type, Integer pageSize, Integer pageNum);
 }

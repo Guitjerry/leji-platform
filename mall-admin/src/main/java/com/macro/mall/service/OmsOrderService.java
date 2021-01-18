@@ -55,4 +55,12 @@ public interface OmsOrderService {
      */
     @Transactional
     int updateNote(Long id, String note, Integer status);
+
+
+    /**
+     * 微信下单
+     * @param omsOrderPayParam
+     * @return
+     */
+    int createOrder(OmsOrderPayParam omsOrderPayParam);
 }

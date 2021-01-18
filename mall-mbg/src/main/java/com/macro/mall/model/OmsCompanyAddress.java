@@ -1,12 +1,15 @@
 package com.macro.mall.model;
 
 import io.swagger.annotations.ApiModelProperty;
+
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 public class OmsCompanyAddress implements Serializable {
     private Long id;
 
     @ApiModelProperty(value = "地址名称")
+    @NotNull(message = "地址名称不能为空")
     private String addressName;
 
     @ApiModelProperty(value = "默认发货地址：0->否；1->是")
@@ -16,9 +19,11 @@ public class OmsCompanyAddress implements Serializable {
     private Integer receiveStatus;
 
     @ApiModelProperty(value = "收发货人姓名")
+    @NotNull(message = "收发货人不能为空")
     private String name;
 
     @ApiModelProperty(value = "收货人电话")
+    @NotNull(message = "收货人电话不能为空")
     private String phone;
 
     @ApiModelProperty(value = "省/直辖市")
@@ -31,6 +36,7 @@ public class OmsCompanyAddress implements Serializable {
     private String region;
 
     @ApiModelProperty(value = "详细地址")
+    @NotNull(message = "详细地址不能为空")
     private String detailAddress;
 
     private static final long serialVersionUID = 1L;

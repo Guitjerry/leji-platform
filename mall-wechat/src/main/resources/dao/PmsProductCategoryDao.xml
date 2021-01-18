@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.macro.mall.mallwechat.dao.PmsProductCategoryDao">
+    <resultMap id="listWithChildrenMap" type="com.macro.mall.mallwechat.dto.PmsProductCategoryWithChildrenItem"
+               extends="com.macro.mall.mapper.PmsProductCategoryMapper.BaseResultMap">
+        <collection property="children" resultMap="com.macro.mall.mapper.PmsProductCategoryMapper.BaseResultMap"
+                    columnPrefix="child_"></collection>
+    </resultMap>
+    <select id="listRoot" resultType="com.macro.mall.model.PmsProductCategory">
+        select
+            c1.id,
+            c1.name,
+            c1.parent_id as parentId
+        from pms_product_category c1
+        where c1.parent_id = 0
+    </select>
+
+    <select id="listByParentId" resultMap="listWithChildrenMap">
+        select
+            c1.*
+        from pms_product_category c1
+        where c1.parent_id = #{id}
+    </select>
+
+</mapper>

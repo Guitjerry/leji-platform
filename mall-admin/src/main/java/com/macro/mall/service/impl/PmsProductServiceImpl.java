@@ -2,10 +2,12 @@ package com.macro.mall.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import com.github.pagehelper.PageHelper;
+import com.google.common.collect.Lists;
 import com.macro.mall.dao.*;
 import com.macro.mall.dto.PmsProductParam;
 import com.macro.mall.dto.PmsProductQueryParam;
 import com.macro.mall.dto.PmsProductResult;
+import com.macro.mall.enums.ListTypeEnum;
 import com.macro.mall.mapper.*;
 import com.macro.mall.model.*;
 import com.macro.mall.service.PmsProductService;
@@ -228,6 +230,18 @@ public class PmsProductServiceImpl implements PmsProductService {
             criteria.andProductCategoryIdEqualTo(productQueryParam.getProductCategoryId());
         }
         return productMapper.selectByExample(productExample);
+    }
+
+    @Override
+    public List<PmsProduct> listByType(Integer type, Integer pageSize, Integer pageNum) {
+        PageHelper.startPage(pageNum, pageSize);
+        List<PmsProduct> pmsProducts = Lists.newArrayList();
+        if(type.equals(ListTypeEnum.NEW.getKey())) {
+            pmsProducts = productMapper.listByNewProduct();
+        }else if(type.equals(ListTypeEnum.TEJIA.getKey())) {
+            pmsProducts = productMapper.listByTejia();
+        }
+        return pmsProducts;
     }
 
     @Override

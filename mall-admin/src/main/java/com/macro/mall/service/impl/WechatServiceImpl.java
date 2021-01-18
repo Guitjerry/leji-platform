@@ -3,6 +3,7 @@ package com.macro.mall.service.impl;
 import cn.hutool.core.codec.Base32;
 import com.alibaba.fastjson.JSONObject;
 import com.macro.mall.common.constant.AuthConstant;
+import com.macro.mall.dto.SessionDto;
 import com.macro.mall.service.WechatService;
 import com.macro.mall.util.ApacheHttpUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +25,7 @@ import java.util.HashMap;
 @Service
 public class WechatServiceImpl implements WechatService {
     @Override
-    public String getOpenIdByCode(String code) {
+    public SessionDto getOpenIdByCode(String code) {
         try {
             String path = "?appid=" + new String(Base32.decode(AuthConstant.appId)) + "&secret=" + new String(Base32.decode(AuthConstant.secret)) + "&js_code=" + code + "&grant_type=authorization_code";
             HttpResponse response = ApacheHttpUtil.doGet("https://api.weixin.qq.com", "/sns/jscode2session" + path, "GET", new HashMap<>(), null);
@@ -34,10 +35,11 @@ public class WechatServiceImpl implements WechatService {
             log.info("responseJsonObj {}", responseJsonObj.toJSONString());
             String openId = responseJsonObj.getString("openid");
             String sessionKey = responseJsonObj.getString("session_key");
+            SessionDto sessionDto = new SessionDto();
             if (StringUtils.isEmpty(openId)) {
                 Assert.notNull(openId, "OpenId查询异常");
             }
-            return openId;
+            return sessionDto;
         } catch (Exception e) {
             log.error("getOpenIdByCode", e);
             Assert.notNull(null, "OpenId查询异常");

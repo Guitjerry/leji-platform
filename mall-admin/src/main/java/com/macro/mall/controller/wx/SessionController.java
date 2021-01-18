@@ -2,32 +2,24 @@ package com.macro.mall.controller.wx;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.common.exception.Asserts;
+import com.macro.mall.dto.SessionDto;
 import com.macro.mall.dto.UmsAdminParam;
 import com.macro.mall.model.UmsAdmin;
-import com.macro.mall.model.UmsAdminExample;
 import com.macro.mall.query.WechatLoginQuery;
 import com.macro.mall.service.UmsAdminService;
 import com.macro.mall.service.WechatService;
 import com.macro.mall.util.TokenUtil;
 import com.macro.mall.vo.LoginInfoVo;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
-import static com.sun.xml.internal.ws.api.message.Packet.Status.Response;
+import com.macro.mall.util.AES;
 
 /**
  *
@@ -40,7 +32,6 @@ public class SessionController {
     private WechatService wechatService;
     @Autowired
     private UmsAdminService adminService;
-
     /**
      * 注册与查询小程序用户信息、
      * 1.根据code查询openId
@@ -58,7 +49,11 @@ public class SessionController {
             Asserts.fail("code不存在");
         }
         //通过openid查询用户信息
-        String openId = wechatService.getOpenIdByCode(wechatLoginQuery.getWechatCode());
+        SessionDto sessionDto = wechatService.getOpenIdByCode(wechatLoginQuery.getWechatCode());
+        if(ObjectUtil.isNull(sessionDto)) {
+            Asserts.fail("校验获取用户失败");
+        }
+        String openId = sessionDto.getOpenId();
         String token = null;
         System.out.println("获取到的openId为" + openId);
         UmsAdmin umsAdmin = adminService.getAdminByOpenId(openId);
@@ -78,5 +73,21 @@ public class SessionController {
         LoginInfoVo loginInfoVo = LoginInfoVo.builder().status(umsAdmin.getStatus())
                 .mobile(umsAdmin.getMobile()).openId(openId).token(token).uid(umsAdmin.getId()).build();
         return CommonResult.success(loginInfoVo);
+    }
+
+
+
+    @RequestMapping(value = "/wetchatGetPhone", method = RequestMethod.GET)
+    @ResponseBody
+    CommonResult<String> wetchatGetPhone(String encryptedData, String iv, String code, String openId)  {
+        SessionDto sessionDto = wechatService.getOpenIdByCode(code);
+        String telPhone = AES.wxDecrypt(encryptedData, sessionDto.getSessionKey(), iv);
+        JSONObject telObject = JSONUtil.parseObj(telPhone);
+        //更新用户手机信息
+        UmsAdmin umsAdmin = adminService.getAdminByOpenId(openId);
+        umsAdmin.setMobile(telPhone);
+        adminService.update(umsAdmin.getId(), umsAdmin);
+        JSONUtil.parseObj(telPhone).get("phoneNumber");
+        return CommonResult.success(telPhone);
     }
 }
