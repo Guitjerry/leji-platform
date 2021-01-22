@@ -1,9 +1,12 @@
 package com.macro.mall.controller.wx;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.macro.mall.common.api.CommonPage;
 import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.dto.*;
 import com.macro.mall.model.OmsOrder;
+import com.macro.mall.model.UmsMember;
 import com.macro.mall.service.OmsOrderService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -12,6 +15,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * 订单管理Controller
@@ -27,7 +33,7 @@ public class WxOmsOrderController {
     @ApiOperation("保存订单")
     @RequestMapping(value = "/saveOrder", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult updateNote(@RequestBody OmsOrderPayParam omsOrderPayParam) {
+    public CommonResult saveOrder(@RequestBody OmsOrderPayParam omsOrderPayParam) {
         int count = omsOrderService.createOrder(omsOrderPayParam);
         if (count > 0) {
             return CommonResult.success(count);

@@ -2,6 +2,7 @@ package com.macro.mall.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.github.pagehelper.PageHelper;
 import com.macro.mall.common.exception.Asserts;
 import com.macro.mall.constant.CommonConstant;
@@ -13,10 +14,7 @@ import com.macro.mall.enums.PayTypeEnum;
 import com.macro.mall.mapper.OmsCartItemMapper;
 import com.macro.mall.mapper.OmsOrderMapper;
 import com.macro.mall.mapper.OmsOrderOperateHistoryMapper;
-import com.macro.mall.model.OmsCartItem;
-import com.macro.mall.model.OmsOrder;
-import com.macro.mall.model.OmsOrderExample;
-import com.macro.mall.model.OmsOrderOperateHistory;
+import com.macro.mall.model.*;
 import com.macro.mall.service.OmsOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -166,10 +164,15 @@ public class OmsOrderServiceImpl implements OmsOrderService {
 
     @Override
     public int createOrder(OmsOrderPayParam omsOrderPayParam) {
+        //
+        OmsCompanyAddress omsCompanyAddress =  omsOrderPayParam.getAddresses();
+        if(ObjectUtil.isNull(omsCompanyAddress)) {
+            Asserts.fail("请选择地址！");
+        }
         OmsOrder omsOrder = new OmsOrder();
         AtomicReference<Double> totalAmount = new AtomicReference<>(0.0);
         List<OmsWxAppCart> omsWxAppCarts = omsOrderPayParam.getCarts();
-        if (CollectionUtil.isNotEmpty(omsWxAppCarts)) {
+        if (CollectionUtil.isEmpty(omsWxAppCarts)) {
             Asserts.fail("请选择商品后下单！");
         }
         omsWxAppCarts.forEach(omsWxAppCart -> {
@@ -186,6 +189,14 @@ public class OmsOrderServiceImpl implements OmsOrderService {
         omsOrder.setOrderSn(UUID.randomUUID().toString());
         omsOrder.setCreateTime(DateUtil.parse(DateUtil.now()));
         omsOrder.setTotalAmount(BigDecimal.valueOf(totalAmount.get()));
+        omsOrder.setMemberId(omsOrderPayParam.getMemberId());
+        omsOrder.setReceiverPhone(omsCompanyAddress.getPhone());
+        omsOrder.setReceiverName(omsCompanyAddress.getName());
+        omsOrder.setDeleteStatus(CommonConstant.FLAG_NO);
+        omsOrder.setReceiverProvince(omsCompanyAddress.getProvince());
+        omsOrder.setReceiverCity(omsCompanyAddress.getCity());
+        omsOrder.setReceiverRegion(omsCompanyAddress.getRegion());
+        omsOrder.setReceiverDetailAddress(omsCompanyAddress.getDetailAddress());
         omsOrder.setPayType(PayTypeEnum.NOPAY.getKey());
         omsOrder.setStatus(OrderStatusTypeEnum.hasComplete.getKey());
         omsOrder.setOrderType(CommonConstant.FLAG_YES);

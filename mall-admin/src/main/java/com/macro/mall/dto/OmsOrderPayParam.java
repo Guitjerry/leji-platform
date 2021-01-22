@@ -17,6 +17,15 @@ public class OmsOrderPayParam {
     private OmsCompanyAddress addresses;
     @ApiModelProperty(value = "购物车")
     private List<OmsWxAppCart> carts;
+    private Long memberId;
+
+    public Long getMemberId() {
+        return memberId;
+    }
+
+    public void setMemberId(Long memberId) {
+        this.memberId = memberId;
+    }
 
     public OmsCompanyAddress getAddresses() {
         return addresses;

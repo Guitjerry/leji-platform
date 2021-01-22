@@ -39,6 +39,8 @@ public class WechatServiceImpl implements WechatService {
             if (StringUtils.isEmpty(openId)) {
                 Assert.notNull(openId, "OpenId查询异常");
             }
+            sessionDto.setOpenId(openId);
+            sessionDto.setSessionKey(sessionKey);
             return sessionDto;
         } catch (Exception e) {
             log.error("getOpenIdByCode", e);

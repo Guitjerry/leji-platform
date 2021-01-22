@@ -12,6 +12,6 @@ public class LoginInfoVo {
     private Integer status;
     private String token;
     private Long uid;
-    private String mobile;
+    private String phone;
     private String openId;
 }

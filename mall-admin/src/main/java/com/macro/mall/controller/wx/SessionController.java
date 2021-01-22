@@ -4,13 +4,17 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.common.exception.Asserts;
 import com.macro.mall.dto.SessionDto;
 import com.macro.mall.dto.UmsAdminParam;
 import com.macro.mall.model.UmsAdmin;
+import com.macro.mall.model.UmsMember;
 import com.macro.mall.query.WechatLoginQuery;
 import com.macro.mall.service.UmsAdminService;
+import com.macro.mall.service.UmsMemberService;
 import com.macro.mall.service.WechatService;
 import com.macro.mall.util.TokenUtil;
 import com.macro.mall.vo.LoginInfoVo;
@@ -20,6 +24,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import com.macro.mall.util.AES;
+
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -32,6 +41,9 @@ public class SessionController {
     private WechatService wechatService;
     @Autowired
     private UmsAdminService adminService;
+    @Autowired
+    private UmsMemberService userMemberService;
+
     /**
      * 注册与查询小程序用户信息、
      * 1.根据code查询openId
@@ -44,50 +56,51 @@ public class SessionController {
      */
     @RequestMapping(value = "/wetchatLogin", method = RequestMethod.POST)
     @ResponseBody
-    CommonResult<LoginInfoVo> wetchatLogin(@RequestBody WechatLoginQuery wechatLoginQuery)  {
-        if(ObjectUtil.isNull(wechatLoginQuery.getWechatCode())) {
+    CommonResult<LoginInfoVo> wetchatLogin(@RequestBody WechatLoginQuery wechatLoginQuery) {
+        if (ObjectUtil.isNull(wechatLoginQuery.getWechatCode())) {
             Asserts.fail("code不存在");
         }
         //通过openid查询用户信息
         SessionDto sessionDto = wechatService.getOpenIdByCode(wechatLoginQuery.getWechatCode());
-        if(ObjectUtil.isNull(sessionDto)) {
+        if (ObjectUtil.isNull(sessionDto)) {
             Asserts.fail("校验获取用户失败");
         }
         String openId = sessionDto.getOpenId();
         String token = null;
         System.out.println("获取到的openId为" + openId);
-        UmsAdmin umsAdmin = adminService.getAdminByOpenId(openId);
-        if (ObjectUtil.isNull(umsAdmin)) {
-            UmsAdminParam adminParam = new UmsAdminParam();
-            adminParam.setOpenId(openId);
-            BeanUtil.copyProperties(umsAdmin, adminParam);
+        UmsMember umsMember = userMemberService.getByOpenId(openId);
+        if (ObjectUtil.isNull(umsMember)) {
+            umsMember = new UmsMember();
+            umsMember.setOpenId(openId);
             //注册新用户
-            umsAdmin = adminService.register(adminParam);
+            umsMember = userMemberService.register(umsMember);
         }
         try {
             //token
-            token =  TokenUtil.buildJWT(umsAdmin.getOpenId(), umsAdmin.getId(), umsAdmin.getMobile());
-        }catch (Exception e) {
+            token = TokenUtil.buildJWT(umsMember.getOpenId(), umsMember.getId(), umsMember.getPhone());
+        } catch (Exception e) {
             Assert.isTrue(false, "token获取失败");
         }
-        LoginInfoVo loginInfoVo = LoginInfoVo.builder().status(umsAdmin.getStatus())
-                .mobile(umsAdmin.getMobile()).openId(openId).token(token).uid(umsAdmin.getId()).build();
+        LoginInfoVo loginInfoVo = LoginInfoVo.builder().status(umsMember.getStatus())
+                .phone(umsMember.getPhone()).openId(openId).token(token).uid(umsMember.getId()).build();
         return CommonResult.success(loginInfoVo);
     }
 
 
-
     @RequestMapping(value = "/wetchatGetPhone", method = RequestMethod.GET)
     @ResponseBody
-    CommonResult<String> wetchatGetPhone(String encryptedData, String iv, String code, String openId)  {
+    CommonResult<UmsMember> wetchatGetPhone(String encryptedData, String iv, String code) {
         SessionDto sessionDto = wechatService.getOpenIdByCode(code);
-        String telPhone = AES.wxDecrypt(encryptedData, sessionDto.getSessionKey(), iv);
-        JSONObject telObject = JSONUtil.parseObj(telPhone);
-        //更新用户手机信息
-        UmsAdmin umsAdmin = adminService.getAdminByOpenId(openId);
-        umsAdmin.setMobile(telPhone);
-        adminService.update(umsAdmin.getId(), umsAdmin);
-        JSONUtil.parseObj(telPhone).get("phoneNumber");
-        return CommonResult.success(telPhone);
+        String paramObject = AES.wxDecrypt(encryptedData, sessionDto.getSessionKey(), iv);
+        JSONObject param = JSONUtil.parseObj(paramObject);
+        UmsMember umsMember = null;
+        if (ObjectUtil.isNotNull(param)) {
+            String phone = param.getStr("phoneNumber");
+            //更新用户手机信息
+            umsMember = userMemberService.getByOpenId(sessionDto.getOpenId());
+            umsMember.setPhone(phone);
+            userMemberService.update(umsMember);
+        }
+        return CommonResult.success(umsMember);
     }
 }
