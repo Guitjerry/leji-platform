@@ -2602,3 +2602,7 @@ alter table pms_product
 
 alter table ums_member
 	add open_id varchar(100) null comment '小程序openId';
+alter table ums_admin
+	add mobile varchar(64) null;
+alter table pms_brand
+	add recommend varchar(128) null;

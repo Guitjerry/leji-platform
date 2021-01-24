@@ -12,7 +12,6 @@
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
     <result column="login_time" jdbcType="TIMESTAMP" property="loginTime" />
     <result column="status" jdbcType="INTEGER" property="status" />
-    <result column="open_id" jdbcType="VARCHAR" property="openId" />
     <result column="mobile" jdbcType="VARCHAR" property="mobile" />
   </resultMap>
   <sql id="Example_Where_Clause">
@@ -74,8 +73,7 @@
     </where>
   </sql>
   <sql id="Base_Column_List">
-    id, username, password, icon, email, nick_name, note, create_time, login_time, status, 
-    open_id, mobile
+    id, username, password, icon, email, nick_name, note, create_time, login_time, status, mobile
   </sql>
   <select id="selectByExample" parameterType="com.macro.mall.model.UmsAdminExample" resultMap="BaseResultMap">
     select
@@ -113,12 +111,10 @@
     </selectKey>
     insert into ums_admin (username, password, icon, 
       email, nick_name, note, 
-      create_time, login_time, status, 
-      open_id, mobile)
+      create_time, login_time, status, mobile)
     values (#{username,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, #{icon,jdbcType=VARCHAR}, 
       #{email,jdbcType=VARCHAR}, #{nickName,jdbcType=VARCHAR}, #{note,jdbcType=VARCHAR}, 
-      #{createTime,jdbcType=TIMESTAMP}, #{loginTime,jdbcType=TIMESTAMP}, #{status,jdbcType=INTEGER}, 
-      #{openId,jdbcType=VARCHAR}, #{mobile,jdbcType=VARCHAR})
+      #{createTime,jdbcType=TIMESTAMP}, #{loginTime,jdbcType=TIMESTAMP}, #{status,jdbcType=INTEGER},  #{mobile,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.macro.mall.model.UmsAdmin">
     <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
@@ -152,9 +148,6 @@
       </if>
       <if test="status != null">
         status,
-      </if>
-      <if test="openId != null">
-        open_id,
       </if>
       <if test="mobile != null">
         mobile,
@@ -235,9 +228,6 @@
       <if test="record.status != null">
         status = #{record.status,jdbcType=INTEGER},
       </if>
-      <if test="record.openId != null">
-        open_id = #{record.openId,jdbcType=VARCHAR},
-      </if>
       <if test="record.mobile != null">
         mobile = #{record.mobile,jdbcType=VARCHAR},
       </if>
@@ -258,7 +248,6 @@
       create_time = #{record.createTime,jdbcType=TIMESTAMP},
       login_time = #{record.loginTime,jdbcType=TIMESTAMP},
       status = #{record.status,jdbcType=INTEGER},
-      open_id = #{record.openId,jdbcType=VARCHAR},
       mobile = #{record.mobile,jdbcType=VARCHAR}
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
@@ -294,9 +283,6 @@
       <if test="status != null">
         status = #{status,jdbcType=INTEGER},
       </if>
-      <if test="openId != null">
-        open_id = #{openId,jdbcType=VARCHAR},
-      </if>
       <if test="mobile != null">
         mobile = #{mobile,jdbcType=VARCHAR},
       </if>
@@ -314,7 +300,6 @@
       create_time = #{createTime,jdbcType=TIMESTAMP},
       login_time = #{loginTime,jdbcType=TIMESTAMP},
       status = #{status,jdbcType=INTEGER},
-      open_id = #{openId,jdbcType=VARCHAR},
       mobile = #{mobile,jdbcType=VARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
