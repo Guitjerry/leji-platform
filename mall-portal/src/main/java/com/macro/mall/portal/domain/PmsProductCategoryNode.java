@@ -13,5 +13,13 @@ import java.util.List;
 @Getter
 @Setter
 public class PmsProductCategoryNode extends PmsProductCategory {
-    private List<PmsProductCategoryNode> children;
+    private List<PmsProductCategoryNode> childrens;
+
+  public List<PmsProductCategoryNode> getChildrens() {
+    return childrens;
+  }
+
+  public void setChildrens(List<PmsProductCategoryNode> childrens) {
+    this.childrens = childrens;
+  }
 }

@@ -136,7 +136,7 @@ public class PmsPortalProductServiceImpl implements PmsPortalProductService {
         List<PmsProductCategoryNode> children = allList.stream()
                 .filter(subItem -> subItem.getParentId().equals(item.getId()))
                 .map(subItem -> covert(subItem, allList)).collect(Collectors.toList());
-        node.setChildren(children);
+        node.setChildrens(children);
         return node;
     }
 }
