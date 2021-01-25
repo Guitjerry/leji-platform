@@ -1,5 +1,0 @@
-git pull origin master
-mvn clean install -D skipTests
---发布gateway
---发布auth
---发布admin
