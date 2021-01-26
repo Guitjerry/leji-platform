@@ -19,10 +19,14 @@ public class PmsProductQueryParam {
     private String keyword;
     @ApiModelProperty("商品货号")
     private String productSn;
-    @ApiModelProperty("商品分类编号")
-    private Long productCategoryId;
     @ApiModelProperty("商品品牌编号")
     private Long brandId;
+    @ApiModelProperty("商品分类编号")
+    private Long productCategoryId;
+    @ApiModelProperty("商品品牌名称")
+    private Long brandName;
+    @ApiModelProperty("分类名称")
+    private String productCategoryName;
     @ApiModelProperty("列表条件 1新品 2特价")
     private Integer type;
 }

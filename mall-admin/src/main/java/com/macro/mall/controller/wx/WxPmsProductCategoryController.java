@@ -42,4 +42,5 @@ public class WxPmsProductCategoryController {
         List<PmsProductCategory> list = productCategoryService.listCategoryTree();
         return CommonResult.success(list);
     }
+
 }

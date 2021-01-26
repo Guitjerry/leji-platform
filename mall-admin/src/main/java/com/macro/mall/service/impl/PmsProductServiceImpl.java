@@ -226,6 +226,12 @@ public class PmsProductServiceImpl implements PmsProductService {
         if (productQueryParam.getBrandId() != null) {
             criteria.andBrandIdEqualTo(productQueryParam.getBrandId());
         }
+        if (productQueryParam.getBrandName() != null) {
+            criteria.andBrandNameLike("%" + productQueryParam.getBrandName() + "%");
+        }
+        if (productQueryParam.getProductCategoryName() != null) {
+            criteria.andProductCategoryNameLike("%" + productQueryParam.getProductCategoryName() + "%");
+        }
         if (productQueryParam.getProductCategoryId() != null) {
             criteria.andProductCategoryIdEqualTo(productQueryParam.getProductCategoryId());
         }
