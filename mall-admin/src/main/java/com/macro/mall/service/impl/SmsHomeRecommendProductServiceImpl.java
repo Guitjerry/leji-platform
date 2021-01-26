@@ -95,9 +95,7 @@ public class SmsHomeRecommendProductServiceImpl implements SmsHomeRecommendProdu
         if(!StringUtils.isEmpty(productName)){
             criteria.andProductNameLike("%"+productName+"%");
         }
-        if(recommendStatus!=null){
-            criteria.andRecommendStatusEqualTo(recommendStatus);
-        }
+        criteria.andRecommendStatusEqualTo(CommonConstant.FLAG_YES);
         example.setOrderByClause("sort desc");
         List<SmsHomeRecommendProduct> smsHomeRecommendProducts = recommendProductMapper.selectByExample(example);
         List<SmsHomeRecommendProductDto> resultHomeRecommendProductDto = Lists.newArrayList();

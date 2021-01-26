@@ -1,6 +1,7 @@
 package com.macro.mall.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.github.pagehelper.PageHelper;
 import com.google.common.collect.Lists;
 import com.macro.mall.constant.CommonConstant;
@@ -178,8 +179,9 @@ public class PmsProductCategoryServiceImpl implements PmsProductCategoryService 
      */
     private void setCategoryLevel(PmsProductCategory productCategory) {
         //没有父分类时为一级分类
-        if (productCategory.getParentId() == 0) {
+        if (ObjectUtil.isNull(productCategory.getParentId()) || productCategory.getParentId() == 0) {
             productCategory.setLevel(0);
+            productCategory.setParentId(0L);
         } else {
             //有父分类时选择根据父分类level设置
             PmsProductCategory parentCategory = productCategoryMapper.selectByPrimaryKey(productCategory.getParentId());

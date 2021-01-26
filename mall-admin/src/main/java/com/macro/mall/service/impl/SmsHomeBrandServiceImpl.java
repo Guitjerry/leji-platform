@@ -103,11 +103,8 @@ public class SmsHomeBrandServiceImpl implements SmsHomeBrandService {
         if(!StringUtils.isEmpty(brandName)){
             criteria.andBrandNameLike("%"+brandName+"%");
         }
-        if(recommendStatus!=null){
-            criteria.andRecommendStatusEqualTo(recommendStatus);
-        }
+        criteria.andRecommendStatusEqualTo(CommonConstant.FLAG_YES);
         example.setOrderByClause("sort desc");
-
         //品牌推荐
         List<SmsHomeBrand> smsHomeBrands = homeBrandMapper.selectByExample(example);
         List<SmsHomeBrandDto> brandDtos = Lists.newArrayList();

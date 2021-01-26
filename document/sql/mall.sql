@@ -2606,3 +2606,7 @@ alter table ums_admin
 	add mobile varchar(64) null;
 alter table pms_brand
 	add recommend varchar(128) null;
+
+-- 2021-01-26
+create index pms_product_category_parent_id_index
+    on pms_product_category (parent_id);
