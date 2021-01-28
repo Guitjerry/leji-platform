@@ -2610,3 +2610,9 @@ alter table pms_brand
 -- 2021-01-26
 create index pms_product_category_parent_id_index
     on pms_product_category (parent_id);
+-- 2021-01-28
+create index sms_coupon_product_relation_product_id_index
+    on sms_coupon_product_relation (product_id);
+
+create index sms_coupon_product_relation_coupon_id_index
+    on sms_coupon_product_relation (coupon_id);

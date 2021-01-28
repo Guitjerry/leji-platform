@@ -40,8 +40,8 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
     @Autowired
     private PmsProductMapper productMapper;
     @Override
-    public void add(Long couponId) {
-        UmsMember currentMember = memberService.getCurrentMember();
+    public void add(Long couponId, Long userId) {
+       UmsMember currentMember = memberService.getById(userId);
         //获取优惠券信息，判断数量
         SmsCoupon coupon = couponMapper.selectByPrimaryKey(couponId);
         if(coupon==null){
@@ -51,7 +51,7 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
             Asserts.fail("优惠券已经领完了");
         }
         Date now = new Date();
-        if(now.before(coupon.getEnableTime())){
+        if(now.before(coupon.getStartTime())){
             Asserts.fail("优惠券还没到领取时间");
         }
         //判断用户领取的优惠券数量是否超过限制

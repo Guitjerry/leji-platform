@@ -10,6 +10,7 @@ import com.macro.mall.common.api.ResultCode;
 import com.macro.mall.common.constant.AuthConstant;
 import com.macro.mall.common.domain.UserDto;
 import com.macro.mall.common.exception.Asserts;
+import com.macro.mall.common.util.TokenUtil;
 import com.macro.mall.mapper.UmsMemberLevelMapper;
 import com.macro.mall.mapper.UmsMemberMapper;
 import com.macro.mall.model.UmsMember;
@@ -130,22 +131,39 @@ public class UmsMemberServiceImpl implements UmsMemberService {
         memberCacheService.delMember(umsMember.getId());
     }
 
-    @Override
-    public UmsMember getCurrentMember() {
-        String userStr = request.getHeader(AuthConstant.USER_TOKEN_HEADER);
-        if(StrUtil.isEmpty(userStr)){
-            Asserts.fail(ResultCode.UNAUTHORIZED);
-        }
-        UserDto userDto = JSONUtil.toBean(userStr, UserDto.class);
-        UmsMember member = memberCacheService.getMember(userDto.getId());
-        if(member!=null){
-            return member;
-        }else{
-            member = getById(userDto.getId());
-            memberCacheService.setMember(member);
-            return member;
-        }
+  @Override
+  public UmsMember getCurrentMember() {
+    String userStr = request.getHeader(AuthConstant.USER_TOKEN_HEADER);
+    if(StrUtil.isEmpty(userStr)){
+      Asserts.fail(ResultCode.UNAUTHORIZED);
     }
+    UserDto userDto = JSONUtil.toBean(userStr, UserDto.class);
+    UmsMember member = memberCacheService.getMember(userDto.getId());
+    if(member!=null){
+      return member;
+    }else{
+      member = getById(userDto.getId());
+      memberCacheService.setMember(member);
+      return member;
+    }
+  }
+
+  @Override
+  public UmsMember getWxMember() {
+    UmsMember umsMember = null;
+    String token = request.getHeader(AuthConstant.JWT_TOKEN_HEADER);
+    String openId =  TokenUtil.validateToken(token);
+    if(StrUtil.isEmpty(openId)){
+      Asserts.fail(ResultCode.UNAUTHORIZED);
+    }
+    UmsMemberExample memberExample = new UmsMemberExample();
+    memberExample.or().andOpenIdEqualTo(openId);
+    List<UmsMember> umsMembers = memberMapper.selectByExample(memberExample);
+    if(CollUtil.isEmpty(umsMembers)) {
+      umsMember = umsMembers.get(0);
+    }
+    return umsMember;
+  }
 
     @Override
     public void updateIntegration(Long id, Integer integration) {

@@ -3,6 +3,7 @@ package com.macro.mall.portal.controller;
 import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.model.SmsCoupon;
 import com.macro.mall.model.SmsCouponHistory;
+import com.macro.mall.model.UmsMember;
 import com.macro.mall.portal.domain.CartPromotionItem;
 import com.macro.mall.portal.domain.SmsCouponHistoryDetail;
 import com.macro.mall.portal.service.OmsCartItemService;
@@ -33,10 +34,10 @@ public class UmsMemberCouponController {
     private UmsMemberService memberService;
 
     @ApiOperation("领取指定优惠券")
-    @RequestMapping(value = "/add/{couponId}", method = RequestMethod.POST)
+    @RequestMapping(value = "/add", method = RequestMethod.GET)
     @ResponseBody
-    public CommonResult add(@PathVariable Long couponId) {
-        memberCouponService.add(couponId);
+    public CommonResult add(Long couponId, Long userId) {
+        memberCouponService.add(couponId, userId);
         return CommonResult.success(null,"领取成功");
     }
 

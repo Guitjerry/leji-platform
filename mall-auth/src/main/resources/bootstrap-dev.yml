@@ -3,9 +3,11 @@ spring:
     nacos:
       discovery:
         server-addr: http://118.178.143.233:8848
+        namespace: 19c90a94-1188-4b04-996c-e3f464dff81b
       config:
         server-addr: http://118.178.143.233:8848
         file-extension: yaml
+        namespace: 19c90a94-1188-4b04-996c-e3f464dff81b
 logging:
   level:
     root: debug

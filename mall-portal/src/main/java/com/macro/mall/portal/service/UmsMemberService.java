@@ -57,4 +57,6 @@ public interface UmsMemberService {
      * 登录后获取token
      */
     CommonResult login(String username, String password);
+
+    UmsMember getWxMember();
 }
