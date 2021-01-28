@@ -1,6 +1,7 @@
 package com.macro.mall.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.github.pagehelper.PageHelper;
 import com.google.common.collect.Lists;
 import com.macro.mall.dao.*;
@@ -13,6 +14,8 @@ import com.macro.mall.enums.ListTypeEnum;
 import com.macro.mall.mapper.*;
 import com.macro.mall.model.*;
 import com.macro.mall.service.PmsProductService;
+
+import java.math.BigDecimal;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +75,9 @@ public class PmsProductServiceImpl implements PmsProductService {
     @Autowired
     private SmsCouponMapper smsCouponMapper;
     @Autowired
-    private SmsCouponProductRelationMapper relationMapper;
+    private SmsCouponProductRelationMapper smsCouponProductRelationMapper;
+    @Autowired
+    private SmsCouponHistoryMapper smsCouponHistoryMapper;
     @Override
     public int create(PmsProductParam productParam) {
         int count;
@@ -270,20 +275,40 @@ public class PmsProductServiceImpl implements PmsProductService {
 
       //产品满减价格
       PmsProductFullReductionExample reductionExample = new PmsProductFullReductionExample();
-      reductionExample.or().andProductIdIn(productIds)
+      reductionExample.or().andProductIdIn(productIds);
       List<PmsProductFullReduction> fullReductions = productFullReductionMapper.selectByExample(reductionExample);
       Map<Long, List<PmsProductFullReduction>> reductionMap = CollUtil.isNotEmpty(fullReductions)?
         fullReductions.stream().collect(Collectors.groupingBy(PmsProductFullReduction::getProductId)): null;
 
       //优惠券
-      SmsCouponProductRelationExample productRelationExample = new SmsCouponProductRelationExample();
-      productRelationExample.or().andProductIdIn(productIds);
-      List<SmsCouponProductRelation> productRelations =  relationMapper.selectByExample(productRelationExample);
-      Map<Long, List<SmsCouponProductRelation>> relationMap = CollUtil.isNotEmpty(productRelations)?
-        productRelations.stream().collect(Collectors.groupingBy(SmsCouponProductRelation::getProductId)): null;
+      SmsCouponHistoryExample historyExample = new SmsCouponHistoryExample();
+      historyExample.or().andMemberIdEqualTo(memberId);
+      List<SmsCouponHistory> smsCouponHistoryList =  smsCouponHistoryMapper.selectByExample(historyExample);
+//      List<SmsCouponHistory> filterCouponLists = Lists.newArrayList();
+//      //过滤掉非本购物车内商品的
+//      smsCouponHistoryList.forEach(smsCouponHistory -> {
+//          SmsCouponProductRelationExample relationExample = new SmsCouponProductRelationExample();
+//          relationExample.or().andCouponIdEqualTo(smsCouponHistory.getCouponId());
+//          if(smsCouponProductRelationMapper.countByExample(relationExample) > 0) {
+//
+//          }
+//      });
 
-      //根据订单金额返回使用的优惠券
+        //满减力度最大的
+        ProductDiscountDto productDiscountDto = new ProductDiscountDto();
+        for(OmsWxAppCart omsWxAppCart: carts) {
+            BigDecimal goodAllPrice = BigDecimal.valueOf(omsWxAppCart.getPrice() * omsWxAppCart.getCount());
+            if(ObjectUtil.isNotNull(reductionMap)) {
+                //满减
+                List<PmsProductFullReduction> reductions = reductionMap.get(omsWxAppCart.getId());
+                reductions = reductions.stream().filter(pmsProductFullReduction -> pmsProductFullReduction.getFullPrice()
+                        .compareTo(goodAllPrice)>=0).sorted((o1, o2) -> o1.getFullPrice().compareTo(o2.getFullPrice())).collect(Collectors.toList());
 
+                productDiscountDto.setFullReduction(reductions.get(0));
+            }
+        }
+
+        //阶梯折扣
 
     }
 

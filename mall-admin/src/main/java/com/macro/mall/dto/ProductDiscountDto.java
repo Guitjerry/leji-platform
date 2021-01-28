@@ -6,6 +6,8 @@ import com.macro.mall.model.PmsProductLadder;
 import com.macro.mall.model.SmsCoupon;
 import io.swagger.annotations.ApiModelProperty;
 
+import java.util.List;
+
 /**
  * 优惠信息
  */
@@ -15,7 +17,7 @@ public class ProductDiscountDto {
   @ApiModelProperty("产品阶梯价格")
   private PmsProductLadder pmsProductLadder;
   @ApiModelProperty("优惠券")
-  private SmsCoupon coupon;
+  private List<SmsCoupon> coupons;
 
   public PmsProductFullReduction getFullReduction() {
     return fullReduction;
@@ -33,11 +35,11 @@ public class ProductDiscountDto {
     this.pmsProductLadder = pmsProductLadder;
   }
 
-  public SmsCoupon getCoupon() {
-    return coupon;
+  public List<SmsCoupon> getCoupons() {
+    return coupons;
   }
 
-  public void setCoupon(SmsCoupon coupon) {
-    this.coupon = coupon;
+  public void setCoupons(List<SmsCoupon> coupons) {
+    this.coupons = coupons;
   }
 }

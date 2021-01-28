@@ -30,7 +30,17 @@ public class OmsWxAppCart {
     @ApiModelProperty(value = "产品分类名称")
     private String productCategoryName;
 
-  public Long getId() {
+    private Integer count;
+
+    public Integer getCount() {
+        return count;
+    }
+
+    public void setCount(Integer count) {
+        this.count = count;
+    }
+
+    public Long getId() {
     return id;
   }
 
