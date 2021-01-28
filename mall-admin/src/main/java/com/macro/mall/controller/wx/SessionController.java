@@ -7,7 +7,9 @@ import cn.hutool.json.JSONUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.macro.mall.common.api.CommonResult;
+import com.macro.mall.common.constant.AuthConstant;
 import com.macro.mall.common.exception.Asserts;
+import com.macro.mall.common.service.RedisService;
 import com.macro.mall.dto.SessionDto;
 import com.macro.mall.dto.UmsAdminParam;
 import com.macro.mall.model.UmsAdmin;
@@ -43,6 +45,8 @@ public class SessionController {
     private UmsAdminService adminService;
     @Autowired
     private UmsMemberService userMemberService;
+    @Autowired
+    private RedisService redisService;
 
     /**
      * 注册与查询小程序用户信息、
@@ -77,7 +81,7 @@ public class SessionController {
         }
         try {
             //token
-            token = TokenUtil.buildJWT(umsMember.getOpenId(), umsMember.getId(), umsMember.getPhone());
+          token = TokenUtil.buildJWT(umsMember.getOpenId(), umsMember.getId(), umsMember.getPhone());
         } catch (Exception e) {
             Assert.isTrue(false, "token获取失败");
         }

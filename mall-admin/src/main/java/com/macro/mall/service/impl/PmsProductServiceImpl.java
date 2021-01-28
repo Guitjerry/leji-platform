@@ -4,13 +4,16 @@ import cn.hutool.core.collection.CollUtil;
 import com.github.pagehelper.PageHelper;
 import com.google.common.collect.Lists;
 import com.macro.mall.dao.*;
+import com.macro.mall.dto.OmsWxAppCart;
 import com.macro.mall.dto.PmsProductParam;
 import com.macro.mall.dto.PmsProductQueryParam;
 import com.macro.mall.dto.PmsProductResult;
+import com.macro.mall.dto.ProductDiscountDto;
 import com.macro.mall.enums.ListTypeEnum;
 import com.macro.mall.mapper.*;
 import com.macro.mall.model.*;
 import com.macro.mall.service.PmsProductService;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,7 +69,10 @@ public class PmsProductServiceImpl implements PmsProductService {
     private PmsProductDao productDao;
     @Autowired
     private PmsProductVertifyRecordDao productVertifyRecordDao;
-
+    @Autowired
+    private SmsCouponMapper smsCouponMapper;
+    @Autowired
+    private SmsCouponProductRelationMapper relationMapper;
     @Override
     public int create(PmsProductParam productParam) {
         int count;
@@ -239,18 +245,53 @@ public class PmsProductServiceImpl implements PmsProductService {
     }
 
     @Override
-    public List<PmsProduct> listByType(Integer type, Integer pageSize, Integer pageNum) {
+    public List<PmsProductParam> listByType(Integer type, Integer pageSize, Integer pageNum) {
         PageHelper.startPage(pageNum, pageSize);
-        List<PmsProduct> pmsProducts = Lists.newArrayList();
+        List<PmsProductParam> pmsProducts = Lists.newArrayList();
         if(type.equals(ListTypeEnum.NEW.getKey())) {
-            pmsProducts = productMapper.listByNewProduct();
+            pmsProducts = productDao.listByNewProduct();
         }else if(type.equals(ListTypeEnum.TEJIA.getKey())) {
-            pmsProducts = productMapper.listByTejia();
+            pmsProducts = productDao.listByTejia();
         }
         return pmsProducts;
     }
 
-    @Override
+  @Override
+  public ProductDiscountDto queryDiscount(List<OmsWxAppCart> carts, Long memberId) {
+     //计算优惠信息
+    if(!CollUtil.isEmpty(carts)) {
+      //产品阶梯价格
+      List<Long> productIds = carts.stream().map(OmsWxAppCart::getId).collect(Collectors.toList());
+      PmsProductLadderExample ladderExample = new PmsProductLadderExample();
+      ladderExample.or().andProductIdIn(productIds);
+      List<PmsProductLadder> ladders = productLadderMapper.selectByExample(ladderExample);
+      Map<Long, List<PmsProductLadder>> ladderMap = CollUtil.isNotEmpty(ladders)?
+        ladders.stream().collect(Collectors.groupingBy(PmsProductLadder::getProductId)): null;
+
+      //产品满减价格
+      PmsProductFullReductionExample reductionExample = new PmsProductFullReductionExample();
+      reductionExample.or().andProductIdIn(productIds)
+      List<PmsProductFullReduction> fullReductions = productFullReductionMapper.selectByExample(reductionExample);
+      Map<Long, List<PmsProductFullReduction>> reductionMap = CollUtil.isNotEmpty(fullReductions)?
+        fullReductions.stream().collect(Collectors.groupingBy(PmsProductFullReduction::getProductId)): null;
+
+      //优惠券
+      SmsCouponProductRelationExample productRelationExample = new SmsCouponProductRelationExample();
+      productRelationExample.or().andProductIdIn(productIds);
+      List<SmsCouponProductRelation> productRelations =  relationMapper.selectByExample(productRelationExample);
+      Map<Long, List<SmsCouponProductRelation>> relationMap = CollUtil.isNotEmpty(productRelations)?
+        productRelations.stream().collect(Collectors.groupingBy(SmsCouponProductRelation::getProductId)): null;
+
+      //根据订单金额返回使用的优惠券
+
+
+    }
+
+
+    return null;
+  }
+
+  @Override
     public int updateVerifyStatus(List<Long> ids, Integer verifyStatus, String detail) {
         PmsProduct product = new PmsProduct();
         product.setVerifyStatus(verifyStatus);

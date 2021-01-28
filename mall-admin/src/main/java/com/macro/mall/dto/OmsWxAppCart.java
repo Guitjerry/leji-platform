@@ -10,11 +10,11 @@ import io.swagger.annotations.ApiModelProperty;
  */
 public class OmsWxAppCart {
     @ApiModelProperty(value = "商品Id")
-    private Integer id;
+    private Long id;
     @ApiModelProperty(value = "品牌id")
-    private Integer brandId;
+    private Long brandId;
     @ApiModelProperty(value = "产品分类")
-    private Integer productCategoryId;
+    private Long productCategoryId;
     @ApiModelProperty(value = "产品名称")
     private String name;
     @ApiModelProperty(value = "产品图片")
@@ -30,31 +30,31 @@ public class OmsWxAppCart {
     @ApiModelProperty(value = "产品分类名称")
     private String productCategoryName;
 
-    public Integer getId() {
-        return id;
-    }
+  public Long getId() {
+    return id;
+  }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+  public void setId(Long id) {
+    this.id = id;
+  }
 
-    public Integer getBrandId() {
-        return brandId;
-    }
+  public Long getBrandId() {
+    return brandId;
+  }
 
-    public void setBrandId(Integer brandId) {
-        this.brandId = brandId;
-    }
+  public void setBrandId(Long brandId) {
+    this.brandId = brandId;
+  }
 
-    public Integer getProductCategoryId() {
-        return productCategoryId;
-    }
+  public Long getProductCategoryId() {
+    return productCategoryId;
+  }
 
-    public void setProductCategoryId(Integer productCategoryId) {
-        this.productCategoryId = productCategoryId;
-    }
+  public void setProductCategoryId(Long productCategoryId) {
+    this.productCategoryId = productCategoryId;
+  }
 
-    public String getName() {
+  public String getName() {
         return name;
     }
 

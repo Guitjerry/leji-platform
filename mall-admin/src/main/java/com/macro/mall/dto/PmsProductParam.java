@@ -28,4 +28,6 @@ public class PmsProductParam extends PmsProduct{
     private List<CmsSubjectProductRelation> subjectProductRelationList;
     @ApiModelProperty("优选专区和商品的关系")
     private List<CmsPrefrenceAreaProductRelation> prefrenceAreaProductRelationList;
+  @ApiModelProperty("商品专属优惠券")
+    private List<SmsCoupon> couponList;
 }

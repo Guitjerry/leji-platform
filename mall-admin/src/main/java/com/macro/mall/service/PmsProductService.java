@@ -1,8 +1,10 @@
 package com.macro.mall.service;
 
+import com.macro.mall.dto.OmsWxAppCart;
 import com.macro.mall.dto.PmsProductParam;
 import com.macro.mall.dto.PmsProductQueryParam;
 import com.macro.mall.dto.PmsProductResult;
+import com.macro.mall.dto.ProductDiscountDto;
 import com.macro.mall.model.PmsProduct;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -73,5 +75,7 @@ public interface PmsProductService {
 
     List<PmsProduct> listByBrandId(Long brandId);
 
-    List<PmsProduct> listByType(Integer type, Integer pageSize, Integer pageNum);
+    List<PmsProductParam> listByType(Integer type, Integer pageSize, Integer pageNum);
+
+    ProductDiscountDto queryDiscount(List<OmsWxAppCart> carts, Long memberId);
 }
