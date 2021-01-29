@@ -56,7 +56,17 @@ public class SmsCoupon implements Serializable {
     @ApiModelProperty(value = "可领取的会员类型：0->无限时")
     private Integer memberLevel;
 
+    private Long cid;
+
     private static final long serialVersionUID = 1L;
+
+    public Long getCid() {
+        return cid;
+    }
+
+    public void setCid(Long cid) {
+        this.cid = cid;
+    }
 
     public Long getId() {
         return id;

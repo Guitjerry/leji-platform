@@ -18,8 +18,6 @@ public class ProductDiscountDto {
   private PmsProductFullReduction fullReduction;
   @ApiModelProperty("产品阶梯价格")
   private PmsProductLadder pmsProductLadder;
-  @ApiModelProperty("优惠券")
-  private List<SmsCoupon> coupons;
   private Integer type;// 1产品满减  2产品阶梯价格
   private Double saleDiscount;
 
@@ -53,14 +51,6 @@ public class ProductDiscountDto {
 
   public void setPmsProductLadder(PmsProductLadder pmsProductLadder) {
     this.pmsProductLadder = pmsProductLadder;
-  }
-
-  public List<SmsCoupon> getCoupons() {
-    return coupons;
-  }
-
-  public void setCoupons(List<SmsCoupon> coupons) {
-    this.coupons = coupons;
   }
 
   public Long getGoodId() {

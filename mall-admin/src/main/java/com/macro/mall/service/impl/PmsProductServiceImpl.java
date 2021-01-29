@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.github.pagehelper.PageHelper;
 import com.google.common.collect.Lists;
+import com.macro.mall.common.enums.CouponTypeEnum;
 import com.macro.mall.dao.*;
 import com.macro.mall.dto.AllCartDiscountDto;
 import com.macro.mall.dto.CartDiscountQuery;
@@ -19,6 +20,7 @@ import com.macro.mall.service.PmsProductService;
 
 import java.math.BigDecimal;
 import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -80,6 +83,7 @@ public class PmsProductServiceImpl implements PmsProductService {
     private SmsCouponProductRelationMapper smsCouponProductRelationMapper;
     @Autowired
     private SmsCouponHistoryMapper smsCouponHistoryMapper;
+
     @Override
     public int create(PmsProductParam productParam) {
         int count;
@@ -96,7 +100,7 @@ public class PmsProductServiceImpl implements PmsProductService {
         //满减价格
         relateAndInsertList(productFullReductionDao, productParam.getProductFullReductionList(), productId);
         //处理sku的编码
-        handleSkuStockCode(productParam.getSkuStockList(),productId);
+        handleSkuStockCode(productParam.getSkuStockList(), productId);
         //添加sku库存信息
         relateAndInsertList(skuStockDao, productParam.getSkuStockList(), productId);
         //添加商品参数,添加自定义商品规格
@@ -110,10 +114,10 @@ public class PmsProductServiceImpl implements PmsProductService {
     }
 
     private void handleSkuStockCode(List<PmsSkuStock> skuStockList, Long productId) {
-        if(CollectionUtils.isEmpty(skuStockList))return;
-        for(int i=0;i<skuStockList.size();i++){
+        if (CollectionUtils.isEmpty(skuStockList)) return;
+        for (int i = 0; i < skuStockList.size(); i++) {
             PmsSkuStock skuStock = skuStockList.get(i);
-            if(StringUtils.isEmpty(skuStock.getSkuCode())){
+            if (StringUtils.isEmpty(skuStock.getSkuCode())) {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
                 StringBuilder sb = new StringBuilder();
                 //日期
@@ -121,7 +125,7 @@ public class PmsProductServiceImpl implements PmsProductService {
                 //四位商品id
                 sb.append(String.format("%04d", productId));
                 //三位索引id
-                sb.append(String.format("%03d", i+1));
+                sb.append(String.format("%03d", i + 1));
                 skuStock.setSkuCode(sb.toString());
             }
         }
@@ -179,7 +183,7 @@ public class PmsProductServiceImpl implements PmsProductService {
         //当前的sku信息
         List<PmsSkuStock> currSkuList = productParam.getSkuStockList();
         //当前没有sku直接删除
-        if(CollUtil.isEmpty(currSkuList)){
+        if (CollUtil.isEmpty(currSkuList)) {
             PmsSkuStockExample skuStockExample = new PmsSkuStockExample();
             skuStockExample.createCriteria().andProductIdEqualTo(id);
             skuStockMapper.deleteByExample(skuStockExample);
@@ -190,27 +194,27 @@ public class PmsProductServiceImpl implements PmsProductService {
         skuStockExample.createCriteria().andProductIdEqualTo(id);
         List<PmsSkuStock> oriStuList = skuStockMapper.selectByExample(skuStockExample);
         //获取新增sku信息
-        List<PmsSkuStock> insertSkuList = currSkuList.stream().filter(item->item.getId()==null).collect(Collectors.toList());
+        List<PmsSkuStock> insertSkuList = currSkuList.stream().filter(item -> item.getId() == null).collect(Collectors.toList());
         //获取需要更新的sku信息
-        List<PmsSkuStock> updateSkuList = currSkuList.stream().filter(item->item.getId()!=null).collect(Collectors.toList());
+        List<PmsSkuStock> updateSkuList = currSkuList.stream().filter(item -> item.getId() != null).collect(Collectors.toList());
         List<Long> updateSkuIds = updateSkuList.stream().map(PmsSkuStock::getId).collect(Collectors.toList());
         //获取需要删除的sku信息
-        List<PmsSkuStock> removeSkuList = oriStuList.stream().filter(item-> !updateSkuIds.contains(item.getId())).collect(Collectors.toList());
-        handleSkuStockCode(insertSkuList,id);
-        handleSkuStockCode(updateSkuList,id);
+        List<PmsSkuStock> removeSkuList = oriStuList.stream().filter(item -> !updateSkuIds.contains(item.getId())).collect(Collectors.toList());
+        handleSkuStockCode(insertSkuList, id);
+        handleSkuStockCode(updateSkuList, id);
         //新增sku
-        if(CollUtil.isNotEmpty(insertSkuList)){
+        if (CollUtil.isNotEmpty(insertSkuList)) {
             relateAndInsertList(skuStockDao, insertSkuList, id);
         }
         //删除sku
-        if(CollUtil.isNotEmpty(removeSkuList)){
+        if (CollUtil.isNotEmpty(removeSkuList)) {
             List<Long> removeSkuIds = removeSkuList.stream().map(PmsSkuStock::getId).collect(Collectors.toList());
             PmsSkuStockExample removeExample = new PmsSkuStockExample();
             removeExample.createCriteria().andIdIn(removeSkuIds);
             skuStockMapper.deleteByExample(removeExample);
         }
         //修改sku
-        if(CollUtil.isNotEmpty(updateSkuList)){
+        if (CollUtil.isNotEmpty(updateSkuList)) {
             for (PmsSkuStock pmsSkuStock : updateSkuList) {
                 skuStockMapper.updateByPrimaryKeySelective(pmsSkuStock);
             }
@@ -255,70 +259,100 @@ public class PmsProductServiceImpl implements PmsProductService {
     public List<PmsProductParam> listByType(Integer type, Integer pageSize, Integer pageNum) {
         PageHelper.startPage(pageNum, pageSize);
         List<PmsProductParam> pmsProducts = Lists.newArrayList();
-        if(type.equals(ListTypeEnum.NEW.getKey())) {
+        if (type.equals(ListTypeEnum.NEW.getKey())) {
             pmsProducts = productDao.listByNewProduct();
-        }else if(type.equals(ListTypeEnum.TEJIA.getKey())) {
+        } else if (type.equals(ListTypeEnum.TEJIA.getKey())) {
             pmsProducts = productDao.listByTejia();
         }
         return pmsProducts;
     }
 
-  @Override
-  public AllCartDiscountDto queryDiscount(List<OmsWxAppCart> carts, Long memberId) {
-    List<ProductDiscountDto> discountDtos = Lists.newArrayList();
-     //计算优惠信息
-    if(!CollUtil.isEmpty(carts)) {
-      //产品阶梯价格
-      List<Long> productIds = carts.stream().map(OmsWxAppCart::getId).collect(Collectors.toList());
-      PmsProductLadderExample ladderExample = new PmsProductLadderExample();
-      ladderExample.or().andProductIdIn(productIds);
-      List<PmsProductLadder> ladders = productLadderMapper.selectByExample(ladderExample);
-      Map<Long, List<PmsProductLadder>> ladderMap = CollUtil.isNotEmpty(ladders)?
-        ladders.stream().collect(Collectors.groupingBy(PmsProductLadder::getProductId)): null;
+    @Override
+    public AllCartDiscountDto queryDiscount(List<OmsWxAppCart> carts, Long memberId) {
+        AllCartDiscountDto allCartDiscountDto  = new AllCartDiscountDto();
+        List<ProductDiscountDto> discountDtos = Lists.newArrayList();
+        //计算优惠信息
+        if (!CollUtil.isEmpty(carts)) {
+            //总金额
+            Double allPrice = carts.stream().mapToDouble(cart -> cart.getPrice() * cart.getCount()).sum();
+            Map<Long, List<OmsWxAppCart>> catrgoryCart = carts.stream().collect(Collectors.groupingBy(OmsWxAppCart::getProductCategoryId));
+            Map<Long, OmsWxAppCart> goodCart = carts.stream().collect(Collectors.toMap(OmsWxAppCart::getProductCategoryId, Function.identity()));
 
-      //产品满减价格
-      PmsProductFullReductionExample reductionExample = new PmsProductFullReductionExample();
-      reductionExample.or().andProductIdIn(productIds);
-      List<PmsProductFullReduction> fullReductions = productFullReductionMapper.selectByExample(reductionExample);
-      Map<Long, List<PmsProductFullReduction>> reductionMap = CollUtil.isNotEmpty(fullReductions)?
-        fullReductions.stream().collect(Collectors.groupingBy(PmsProductFullReduction::getProductId)): null;
+            //产品阶梯价格
+            List<Long> productIds = carts.stream().map(OmsWxAppCart::getId).collect(Collectors.toList());
+            PmsProductLadderExample ladderExample = new PmsProductLadderExample();
+            ladderExample.or().andProductIdIn(productIds);
+            List<PmsProductLadder> ladders = productLadderMapper.selectByExample(ladderExample);
+            Map<Long, List<PmsProductLadder>> ladderMap = CollUtil.isNotEmpty(ladders) ?
+                    ladders.stream().collect(Collectors.groupingBy(PmsProductLadder::getProductId)) : null;
 
-      //查询可以使用的优惠券
-      CartDiscountQuery cartDiscountQuery = new CartDiscountQuery();
-      cartDiscountQuery.setUserId(memberId);
-      cartDiscountQuery.setProductIds(productIds);
-      List<SmsCoupon> smsCoupons = productDao.queryCartMemberCoupon(cartDiscountQuery);
-      // smsCoupons.stream().sorted((o1,o2) -> o1.get)
+            //产品满减价格
+            PmsProductFullReductionExample reductionExample = new PmsProductFullReductionExample();
+            reductionExample.or().andProductIdIn(productIds);
+            List<PmsProductFullReduction> fullReductions = productFullReductionMapper.selectByExample(reductionExample);
+            Map<Long, List<PmsProductFullReduction>> reductionMap = CollUtil.isNotEmpty(fullReductions) ?
+                    fullReductions.stream().collect(Collectors.groupingBy(PmsProductFullReduction::getProductId)) : null;
 
-      //满减力度最大的
-      ProductDiscountDto productDiscountDto = new ProductDiscountDto();
-      for(OmsWxAppCart omsWxAppCart: carts) {
-        BigDecimal goodAllPrice = BigDecimal.valueOf(omsWxAppCart.getPrice() * omsWxAppCart.getCount());
-        if(ObjectUtil.isNotNull(reductionMap)) {
-          //满减
-          List<PmsProductFullReduction> reductions = reductionMap.get(omsWxAppCart.getId());
-          reductions = reductions.stream().filter(pmsProductFullReduction -> pmsProductFullReduction.getFullPrice()
-            .compareTo(goodAllPrice)>=0).sorted((o1, o2) -> o1.getFullPrice().compareTo(o2.getFullPrice())).collect(Collectors.toList());
-          productDiscountDto.setFullReduction(reductions.get(0));
+            //查询可以使用的优惠券
+            CartDiscountQuery cartDiscountQuery = new CartDiscountQuery();
+            cartDiscountQuery.setUserId(memberId);
+            cartDiscountQuery.setProductIds(productIds);
+            List<SmsCoupon> smsCoupons = productDao.queryCartMemberCoupon(cartDiscountQuery);
+            List<SmsCoupon> smsFilterCoupons = Lists.newArrayList();
+            //总金额
+            for(SmsCoupon smsCoupon: smsCoupons) {
+                //如果优惠券是通用的，比较总金额与优惠券限定金额
+                if (smsCoupon.getUseType().equals(CouponTypeEnum.COMMON.getKey()) && smsCoupon.getMinPoint().doubleValue() >= allPrice) {
+                    smsFilterCoupons.add(smsCoupon);
+                } else if (smsCoupon.getUseType().equals(CouponTypeEnum.CATEGORY.getKey())) {
+                    //如果优惠券是某个分类的，比较分类商品总金额与优惠券限定金额
+                    List<OmsWxAppCart> omsWxAppCarts = catrgoryCart.get(smsCoupon.getCid());
+                    Double allCatoryPrice = omsWxAppCarts.stream().mapToDouble(cart -> cart.getPrice() * cart.getCount()).sum();
+                    if (smsCoupon.getMinPoint().doubleValue() >= allCatoryPrice) {
+                        smsFilterCoupons.add(smsCoupon);
+                    }
+                } else if (smsCoupon.getUseType().equals(CouponTypeEnum.GOOD.getKey())) {
+                    //如果优惠券是某个商品的，比较商品总金额与优惠券限定金额
+                    OmsWxAppCart omsWxAppCart = goodCart.get(smsCoupon.getCid());
+                    Double goodPrice = omsWxAppCart.getPrice() * omsWxAppCart.getCount();
+                    if (smsCoupon.getMinPoint().doubleValue() >= goodPrice) {
+                        smsFilterCoupons.add(smsCoupon);
+                    }
+                }
+            }
+            smsFilterCoupons = smsFilterCoupons.stream().sorted((o1,o2) -> o1.getAmount().compareTo(o2.getAmount())).collect(Collectors.toList());
+            allCartDiscountDto.setCoupons(smsFilterCoupons);
+            //满减力度最大的
+            ProductDiscountDto productDiscountDto = new ProductDiscountDto();
+            for (OmsWxAppCart omsWxAppCart : carts) {
+                productDiscountDto.setGoodId(omsWxAppCart.getId());
+                productDiscountDto.setGoodName(omsWxAppCart.getName());
+                BigDecimal goodAllPrice = BigDecimal.valueOf(omsWxAppCart.getPrice() * omsWxAppCart.getCount());
+                if (ObjectUtil.isNotNull(reductionMap)) {
+                    //满减
+                    List<PmsProductFullReduction> reductions = reductionMap.get(omsWxAppCart.getId());
+                    reductions = reductions.stream().filter(pmsProductFullReduction -> pmsProductFullReduction.getFullPrice()
+                            .compareTo(goodAllPrice) >= 0).sorted((o1, o2) -> o1.getFullPrice().compareTo(o2.getFullPrice())).collect(Collectors.toList());
+                    productDiscountDto.setFullReduction(reductions.get(0));
+                }
+
+                //阶梯折扣
+                if (ObjectUtil.isNull(ladderMap)) {
+                    List<PmsProductLadder> pmsProductLadders = ladderMap.get(omsWxAppCart.getId());
+                    pmsProductLadders = pmsProductLadders.stream()
+                            .filter(pmsProductLadder -> omsWxAppCart.getCount() <= pmsProductLadder.getCount())
+                            .sorted((o1, o2) -> o1.getDiscount().compareTo(o2.getDiscount())).collect(Collectors.toList());
+                    productDiscountDto.setPmsProductLadder(pmsProductLadders.get(0));
+                }
+            }
+            discountDtos.add(productDiscountDto);
         }
+        allCartDiscountDto.setDiscountDtos(discountDtos);
 
-        //阶梯折扣
-        if (ObjectUtil.isNull(ladderMap)) {
-          List<PmsProductLadder> pmsProductLadders = ladderMap.get(omsWxAppCart.getId());
-          pmsProductLadders = pmsProductLadders.stream()
-            .filter(pmsProductLadder -> omsWxAppCart.getCount() <= pmsProductLadder.getCount())
-            .sorted((o1, o2) -> o1.getDiscount().compareTo(o2.getDiscount())).collect(Collectors.toList());
-          productDiscountDto.setPmsProductLadder(pmsProductLadders.get(0));
-        }
-      }
-      discountDtos.add(productDiscountDto);
+        return allCartDiscountDto;
     }
 
-
-    return null;
-  }
-
-  @Override
+    @Override
     public int updateVerifyStatus(List<Long> ids, Integer verifyStatus, String detail) {
         PmsProduct product = new PmsProduct();
         product.setVerifyStatus(verifyStatus);
@@ -381,7 +415,7 @@ public class PmsProductServiceImpl implements PmsProductService {
         PmsProductExample productExample = new PmsProductExample();
         PmsProductExample.Criteria criteria = productExample.createCriteria();
         criteria.andDeleteStatusEqualTo(0);
-        if(!StringUtils.isEmpty(keyword)){
+        if (!StringUtils.isEmpty(keyword)) {
             criteria.andNameLike("%" + keyword + "%");
             productExample.or().andDeleteStatusEqualTo(0).andProductSnLike("%" + keyword + "%");
         }
@@ -419,8 +453,8 @@ public class PmsProductServiceImpl implements PmsProductService {
         }
     }
 
-  public static void main(String[] args) {
-    System.out.println(new Long(100000000L).intValue());
-  }
+    public static void main(String[] args) {
+        System.out.println(new Long(100000000L).intValue());
+    }
 
 }

@@ -40,6 +40,7 @@
       <result column="enable_time" jdbcType="TIMESTAMP" property="enableTime" />
       <result column="code" jdbcType="VARCHAR" property="code" />
       <result column="member_level" jdbcType="INTEGER" property="memberLevel" />
+      <result column="cid" jdbcType="BIGINT" property="cid" />
     </resultMap>
 
 
@@ -109,7 +110,7 @@
   </select>
 
   <select id="queryCartMemberCoupon" parameterType="com.macro.mall.dto.CartDiscountQuery" resultMap="CouponResultMap">
-    select sc.* from sms_coupon sc
+    select sc.*, sc.product_id as cid from sms_coupon sc
                        inner join sms_coupon_history sch on sch.coupon_id= sc.id
                        inner join sms_coupon_product_relation scpr on sch.coupon_id = scpr.coupon_id
     where sch.member_id=#{userId}
@@ -118,7 +119,7 @@
       #{item}
     </foreach>
     union all
-    select sc.* from sms_coupon sc
+    select sc.*, scpc.product_category_id as cid from sms_coupon sc
     inner join sms_coupon_history sch on sch.coupon_id= sc.id
     inner join sms_coupon_product_category_relation scpc on sch.coupon_id = scpc.coupon_id
     where sch.member_id=#{userId}
@@ -127,7 +128,7 @@
       #{item}
     </foreach>
     union all
-    select sc.* from sms_coupon sc
+    select sc.*, '' as cid from sms_coupon sc
                        inner join sms_coupon_history sch on sch.coupon_id= sc.id
     where sch.member_id=#{userId}
       and not exists(select 1 from sms_coupon_product_relation scpr where sch.coupon_id = scpr.coupon_id)

@@ -70,7 +70,7 @@ public class WxPmsProductController {
   public CommonResult<AllCartDiscountDto> queryDiscount(@RequestBody OmsOrderPayParam omsOrderPayParam) {
     List<PmsProduct> productList = Lists.newArrayList();
     AllCartDiscountDto allCartDiscountDto = productService.queryDiscount(omsOrderPayParam.getCarts(), omsOrderPayParam.getMemberId());
-    return null;
+    return CommonResult.success(allCartDiscountDto);
   }
 
 }
