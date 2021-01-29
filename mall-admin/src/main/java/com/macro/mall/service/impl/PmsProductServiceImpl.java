@@ -5,6 +5,8 @@ import cn.hutool.core.util.ObjectUtil;
 import com.github.pagehelper.PageHelper;
 import com.google.common.collect.Lists;
 import com.macro.mall.dao.*;
+import com.macro.mall.dto.AllCartDiscountDto;
+import com.macro.mall.dto.CartDiscountQuery;
 import com.macro.mall.dto.OmsWxAppCart;
 import com.macro.mall.dto.PmsProductParam;
 import com.macro.mall.dto.PmsProductQueryParam;
@@ -262,7 +264,8 @@ public class PmsProductServiceImpl implements PmsProductService {
     }
 
   @Override
-  public ProductDiscountDto queryDiscount(List<OmsWxAppCart> carts, Long memberId) {
+  public AllCartDiscountDto queryDiscount(List<OmsWxAppCart> carts, Long memberId) {
+    List<ProductDiscountDto> discountDtos = Lists.newArrayList();
      //计算优惠信息
     if(!CollUtil.isEmpty(carts)) {
       //产品阶梯价格
@@ -280,36 +283,35 @@ public class PmsProductServiceImpl implements PmsProductService {
       Map<Long, List<PmsProductFullReduction>> reductionMap = CollUtil.isNotEmpty(fullReductions)?
         fullReductions.stream().collect(Collectors.groupingBy(PmsProductFullReduction::getProductId)): null;
 
-      //优惠券
-      SmsCouponHistoryExample historyExample = new SmsCouponHistoryExample();
-      historyExample.or().andMemberIdEqualTo(memberId);
-      List<SmsCouponHistory> smsCouponHistoryList =  smsCouponHistoryMapper.selectByExample(historyExample);
-//      List<SmsCouponHistory> filterCouponLists = Lists.newArrayList();
-//      //过滤掉非本购物车内商品的
-//      smsCouponHistoryList.forEach(smsCouponHistory -> {
-//          SmsCouponProductRelationExample relationExample = new SmsCouponProductRelationExample();
-//          relationExample.or().andCouponIdEqualTo(smsCouponHistory.getCouponId());
-//          if(smsCouponProductRelationMapper.countByExample(relationExample) > 0) {
-//
-//          }
-//      });
+      //查询可以使用的优惠券
+      CartDiscountQuery cartDiscountQuery = new CartDiscountQuery();
+      cartDiscountQuery.setUserId(memberId);
+      cartDiscountQuery.setProductIds(productIds);
+      List<SmsCoupon> smsCoupons = productDao.queryCartMemberCoupon(cartDiscountQuery);
+      // smsCoupons.stream().sorted((o1,o2) -> o1.get)
 
-        //满减力度最大的
-        ProductDiscountDto productDiscountDto = new ProductDiscountDto();
-        for(OmsWxAppCart omsWxAppCart: carts) {
-            BigDecimal goodAllPrice = BigDecimal.valueOf(omsWxAppCart.getPrice() * omsWxAppCart.getCount());
-            if(ObjectUtil.isNotNull(reductionMap)) {
-                //满减
-                List<PmsProductFullReduction> reductions = reductionMap.get(omsWxAppCart.getId());
-                reductions = reductions.stream().filter(pmsProductFullReduction -> pmsProductFullReduction.getFullPrice()
-                        .compareTo(goodAllPrice)>=0).sorted((o1, o2) -> o1.getFullPrice().compareTo(o2.getFullPrice())).collect(Collectors.toList());
-
-                productDiscountDto.setFullReduction(reductions.get(0));
-            }
+      //满减力度最大的
+      ProductDiscountDto productDiscountDto = new ProductDiscountDto();
+      for(OmsWxAppCart omsWxAppCart: carts) {
+        BigDecimal goodAllPrice = BigDecimal.valueOf(omsWxAppCart.getPrice() * omsWxAppCart.getCount());
+        if(ObjectUtil.isNotNull(reductionMap)) {
+          //满减
+          List<PmsProductFullReduction> reductions = reductionMap.get(omsWxAppCart.getId());
+          reductions = reductions.stream().filter(pmsProductFullReduction -> pmsProductFullReduction.getFullPrice()
+            .compareTo(goodAllPrice)>=0).sorted((o1, o2) -> o1.getFullPrice().compareTo(o2.getFullPrice())).collect(Collectors.toList());
+          productDiscountDto.setFullReduction(reductions.get(0));
         }
 
         //阶梯折扣
-
+        if (ObjectUtil.isNull(ladderMap)) {
+          List<PmsProductLadder> pmsProductLadders = ladderMap.get(omsWxAppCart.getId());
+          pmsProductLadders = pmsProductLadders.stream()
+            .filter(pmsProductLadder -> omsWxAppCart.getCount() <= pmsProductLadder.getCount())
+            .sorted((o1, o2) -> o1.getDiscount().compareTo(o2.getDiscount())).collect(Collectors.toList());
+          productDiscountDto.setPmsProductLadder(pmsProductLadders.get(0));
+        }
+      }
+      discountDtos.add(productDiscountDto);
     }
 
 
@@ -416,5 +418,9 @@ public class PmsProductServiceImpl implements PmsProductService {
             throw new RuntimeException(e.getMessage());
         }
     }
+
+  public static void main(String[] args) {
+    System.out.println(new Long(100000000L).intValue());
+  }
 
 }

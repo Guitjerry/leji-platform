@@ -4,6 +4,7 @@ import cn.hutool.core.util.ObjectUtil;
 import com.google.common.collect.Lists;
 import com.macro.mall.common.api.CommonPage;
 import com.macro.mall.common.api.CommonResult;
+import com.macro.mall.dto.AllCartDiscountDto;
 import com.macro.mall.dto.OmsOrderPayParam;
 import com.macro.mall.dto.PmsProductParam;
 import com.macro.mall.dto.PmsProductQueryParam;
@@ -66,10 +67,10 @@ public class WxPmsProductController {
   @ApiOperation("计算优惠信息")
   @RequestMapping(value = "/queryDiscount", method = RequestMethod.POST)
   @ResponseBody
-  public CommonResult<ProductDiscountDto> queryDiscount(@RequestBody OmsOrderPayParam omsOrderPayParam) {
+  public CommonResult<AllCartDiscountDto> queryDiscount(@RequestBody OmsOrderPayParam omsOrderPayParam) {
     List<PmsProduct> productList = Lists.newArrayList();
-    ProductDiscountDto discountDto = productService.queryDiscount(omsOrderPayParam.getCarts(), omsOrderPayParam.getMemberId());
-    return CommonResult.success(discountDto);
+    AllCartDiscountDto allCartDiscountDto = productService.queryDiscount(omsOrderPayParam.getCarts(), omsOrderPayParam.getMemberId());
+    return null;
   }
 
 }

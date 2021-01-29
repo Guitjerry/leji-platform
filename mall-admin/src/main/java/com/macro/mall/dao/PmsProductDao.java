@@ -1,8 +1,10 @@
 package com.macro.mall.dao;
 
+import com.macro.mall.dto.CartDiscountQuery;
 import com.macro.mall.dto.PmsProductParam;
 import com.macro.mall.dto.PmsProductResult;
 import com.macro.mall.model.PmsProduct;
+import com.macro.mall.model.SmsCoupon;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 
@@ -20,4 +22,6 @@ public interface PmsProductDao {
     List<PmsProductParam> listByNewProduct();
 
     List<PmsProductParam> listByTejia();
+
+    List<SmsCoupon> queryCartMemberCoupon(CartDiscountQuery cartDiscountQuery);
 }

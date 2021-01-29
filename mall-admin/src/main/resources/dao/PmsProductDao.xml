@@ -21,6 +21,27 @@
         <collection property="prefrenceAreaProductRelationList" column="{productId=id}" select="selectPrefrenceAreaProductRelationByProductId"/>
 
     </resultMap>
+    <resultMap id="CouponResultMap" type="com.macro.mall.model.SmsCoupon">
+      <id column="id" jdbcType="BIGINT" property="id" />
+      <result column="type" jdbcType="INTEGER" property="type" />
+      <result column="name" jdbcType="VARCHAR" property="name" />
+      <result column="platform" jdbcType="INTEGER" property="platform" />
+      <result column="count" jdbcType="INTEGER" property="count" />
+      <result column="amount" jdbcType="DECIMAL" property="amount" />
+      <result column="per_limit" jdbcType="INTEGER" property="perLimit" />
+      <result column="min_point" jdbcType="DECIMAL" property="minPoint" />
+      <result column="start_time" jdbcType="TIMESTAMP" property="startTime" />
+      <result column="end_time" jdbcType="TIMESTAMP" property="endTime" />
+      <result column="use_type" jdbcType="INTEGER" property="useType" />
+      <result column="note" jdbcType="VARCHAR" property="note" />
+      <result column="publish_count" jdbcType="INTEGER" property="publishCount" />
+      <result column="use_count" jdbcType="INTEGER" property="useCount" />
+      <result column="receive_count" jdbcType="INTEGER" property="receiveCount" />
+      <result column="enable_time" jdbcType="TIMESTAMP" property="enableTime" />
+      <result column="code" jdbcType="VARCHAR" property="code" />
+      <result column="member_level" jdbcType="INTEGER" property="memberLevel" />
+    </resultMap>
+
 
     <select id="getUpdateInfo" resultMap="updateInfoMap">
         SELECT *,
@@ -85,5 +106,31 @@
              inner join sms_home_recommend_product shrp on p.id = shrp.product_id and shnp.recommend_status=1
              left join sms_coupon_product_relation scpr on p.id =  scpr.product_id
              inner join sms_coupon sc on scpr.coupon_id = sc.id
+  </select>
+
+  <select id="queryCartMemberCoupon" parameterType="com.macro.mall.dto.CartDiscountQuery" resultMap="CouponResultMap">
+    select sc.* from sms_coupon sc
+                       inner join sms_coupon_history sch on sch.coupon_id= sc.id
+                       inner join sms_coupon_product_relation scpr on sch.coupon_id = scpr.coupon_id
+    where sch.member_id=#{userId}
+      and scpr.product_id in
+    <foreach close=")" collection="productIds" item="item" open="(" separator=",">
+      #{item}
+    </foreach>
+    union all
+    select sc.* from sms_coupon sc
+    inner join sms_coupon_history sch on sch.coupon_id= sc.id
+    inner join sms_coupon_product_category_relation scpc on sch.coupon_id = scpc.coupon_id
+    where sch.member_id=#{userId}
+    and scpc.product_category_id in
+    <foreach close=")" collection="categoryIds" item="item" open="(" separator=",">
+      #{item}
+    </foreach>
+    union all
+    select sc.* from sms_coupon sc
+                       inner join sms_coupon_history sch on sch.coupon_id= sc.id
+    where sch.member_id=#{userId}
+      and not exists(select 1 from sms_coupon_product_relation scpr where sch.coupon_id = scpr.coupon_id)
+      and not exists(select 1 from sms_coupon_product_category_relation scpc where sch.coupon_id = scpc.coupon_id)
   </select>
 </mapper>

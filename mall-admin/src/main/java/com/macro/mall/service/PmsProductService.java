@@ -1,5 +1,6 @@
 package com.macro.mall.service;
 
+import com.macro.mall.dto.AllCartDiscountDto;
 import com.macro.mall.dto.OmsWxAppCart;
 import com.macro.mall.dto.PmsProductParam;
 import com.macro.mall.dto.PmsProductQueryParam;
@@ -77,5 +78,5 @@ public interface PmsProductService {
 
     List<PmsProductParam> listByType(Integer type, Integer pageSize, Integer pageNum);
 
-    ProductDiscountDto queryDiscount(List<OmsWxAppCart> carts, Long memberId);
+    AllCartDiscountDto queryDiscount(List<OmsWxAppCart> carts, Long memberId);
 }
