@@ -15,41 +15,43 @@ public class ProductDiscountDto {
   private Long goodId;
   private String goodName;
   @ApiModelProperty("产品满减")
-  private PmsProductFullReduction fullReduction;
+  private List<PmsProductFullReduction> fullReduction;
   @ApiModelProperty("产品阶梯价格")
-  private PmsProductLadder pmsProductLadder;
-  private Integer type;// 1产品满减  2产品阶梯价格
-  private Double saleDiscount;
+  private List<PmsProductLadder> pmsProductLadder;
+  @ApiModelProperty("优惠信息描述")
+  private String discountNote;
+  @ApiModelProperty("即将达到的优惠门槛描述")
+  private String nearDiscountNote;
 
-  public Integer getType() {
-    return type;
+  public String getDiscountNote() {
+    return discountNote;
   }
 
-  public void setType(Integer type) {
-    this.type = type;
+  public void setDiscountNote(String discountNote) {
+    this.discountNote = discountNote;
   }
 
-  public Double getSaleDiscount() {
-    return saleDiscount;
+  public String getNearDiscountNote() {
+    return nearDiscountNote;
   }
 
-  public void setSaleDiscount(Double saleDiscount) {
-    this.saleDiscount = saleDiscount;
+  public void setNearDiscountNote(String nearDiscountNote) {
+    this.nearDiscountNote = nearDiscountNote;
   }
 
-  public PmsProductFullReduction getFullReduction() {
+  public List<PmsProductFullReduction> getFullReduction() {
     return fullReduction;
   }
 
-  public void setFullReduction(PmsProductFullReduction fullReduction) {
+  public void setFullReduction(List<PmsProductFullReduction> fullReduction) {
     this.fullReduction = fullReduction;
   }
 
-  public PmsProductLadder getPmsProductLadder() {
+  public List<PmsProductLadder> getPmsProductLadder() {
     return pmsProductLadder;
   }
 
-  public void setPmsProductLadder(PmsProductLadder pmsProductLadder) {
+  public void setPmsProductLadder(List<PmsProductLadder> pmsProductLadder) {
     this.pmsProductLadder = pmsProductLadder;
   }
 

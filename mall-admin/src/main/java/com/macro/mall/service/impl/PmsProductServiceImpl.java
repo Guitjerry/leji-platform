@@ -1,6 +1,7 @@
 package com.macro.mall.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.github.pagehelper.PageHelper;
 import com.google.common.collect.Lists;
@@ -276,10 +277,11 @@ public class PmsProductServiceImpl implements PmsProductService {
             //总金额
             Double allPrice = carts.stream().mapToDouble(cart -> cart.getPrice() * cart.getCount()).sum();
             Map<Long, List<OmsWxAppCart>> catrgoryCart = carts.stream().collect(Collectors.groupingBy(OmsWxAppCart::getProductCategoryId));
-            Map<Long, OmsWxAppCart> goodCart = carts.stream().collect(Collectors.toMap(OmsWxAppCart::getProductCategoryId, Function.identity()));
+            Map<Long, OmsWxAppCart> goodCart = carts.stream().collect(Collectors.toMap(OmsWxAppCart::getId, Function.identity()));
 
             //产品阶梯价格
             List<Long> productIds = carts.stream().map(OmsWxAppCart::getId).collect(Collectors.toList());
+            List<Long> categoryIds = carts.stream().map(OmsWxAppCart::getProductCategoryId).collect(Collectors.toList());
             PmsProductLadderExample ladderExample = new PmsProductLadderExample();
             ladderExample.or().andProductIdIn(productIds);
             List<PmsProductLadder> ladders = productLadderMapper.selectByExample(ladderExample);
@@ -297,6 +299,7 @@ public class PmsProductServiceImpl implements PmsProductService {
             CartDiscountQuery cartDiscountQuery = new CartDiscountQuery();
             cartDiscountQuery.setUserId(memberId);
             cartDiscountQuery.setProductIds(productIds);
+            cartDiscountQuery.setCategoryIds(categoryIds);
             List<SmsCoupon> smsCoupons = productDao.queryCartMemberCoupon(cartDiscountQuery);
             List<SmsCoupon> smsFilterCoupons = Lists.newArrayList();
             //总金额
@@ -315,7 +318,7 @@ public class PmsProductServiceImpl implements PmsProductService {
                     //如果优惠券是某个商品的，比较商品总金额与优惠券限定金额
                     OmsWxAppCart omsWxAppCart = goodCart.get(smsCoupon.getCid());
                     Double goodPrice = omsWxAppCart.getPrice() * omsWxAppCart.getCount();
-                    if (smsCoupon.getMinPoint().doubleValue() >= goodPrice) {
+                    if (smsCoupon.getMinPoint().doubleValue() <= goodPrice) {
                         smsFilterCoupons.add(smsCoupon);
                     }
                 }
@@ -323,8 +326,8 @@ public class PmsProductServiceImpl implements PmsProductService {
             smsFilterCoupons = smsFilterCoupons.stream().sorted((o1,o2) -> o1.getAmount().compareTo(o2.getAmount())).collect(Collectors.toList());
             allCartDiscountDto.setCoupons(smsFilterCoupons);
             //满减力度最大的
-            ProductDiscountDto productDiscountDto = new ProductDiscountDto();
             for (OmsWxAppCart omsWxAppCart : carts) {
+                ProductDiscountDto productDiscountDto = new ProductDiscountDto();
                 productDiscountDto.setGoodId(omsWxAppCart.getId());
                 productDiscountDto.setGoodName(omsWxAppCart.getName());
                 BigDecimal goodAllPrice = BigDecimal.valueOf(omsWxAppCart.getPrice() * omsWxAppCart.getCount());
@@ -332,20 +335,37 @@ public class PmsProductServiceImpl implements PmsProductService {
                     //满减
                     List<PmsProductFullReduction> reductions = reductionMap.get(omsWxAppCart.getId());
                     reductions = reductions.stream().filter(pmsProductFullReduction -> pmsProductFullReduction.getFullPrice()
-                            .compareTo(goodAllPrice) >= 0).sorted((o1, o2) -> o1.getFullPrice().compareTo(o2.getFullPrice())).collect(Collectors.toList());
-                    productDiscountDto.setFullReduction(reductions.get(0));
+                            .compareTo(goodAllPrice) <= 0).sorted((o1, o2) -> o2.getFullPrice().compareTo(o1.getFullPrice())).collect(Collectors.toList());
+                    if(CollectionUtil.isNotEmpty(reductions)) {
+                        productDiscountDto.setFullReduction(reductions);
+                    }
+                    PmsProductFullReduction fullReduction = reductions.get(0);
+                    String discountNote = omsWxAppCart.getName() + "【金额满" + fullReduction.getFullPrice() + "元减" + fullReduction.getReducePrice() + "】";
+                    productDiscountDto.setDiscountNote(discountNote);
                 }
 
                 //阶梯折扣
-                if (ObjectUtil.isNull(ladderMap)) {
+                if (ObjectUtil.isNotNull(ladderMap)) {
                     List<PmsProductLadder> pmsProductLadders = ladderMap.get(omsWxAppCart.getId());
                     pmsProductLadders = pmsProductLadders.stream()
-                            .filter(pmsProductLadder -> omsWxAppCart.getCount() <= pmsProductLadder.getCount())
+                            .filter(pmsProductLadder -> omsWxAppCart.getCount() >= pmsProductLadder.getCount())
                             .sorted((o1, o2) -> o1.getDiscount().compareTo(o2.getDiscount())).collect(Collectors.toList());
-                    productDiscountDto.setPmsProductLadder(pmsProductLadders.get(0));
+                    if(CollectionUtil.isNotEmpty(pmsProductLadders)) {
+                        productDiscountDto.setPmsProductLadder(pmsProductLadders);
+                    }
+                    PmsProductLadder ladder = pmsProductLadders.get(0);
+                    //优惠金额
+                    BigDecimal saleDiscount = BigDecimal.valueOf(100.00-ladder.getDiscount().doubleValue());
+                    BigDecimal saleZhe = saleDiscount.divide(new BigDecimal("100.00"));
+                    BigDecimal discountMoney = goodAllPrice.multiply(saleZhe);
+                    ladder.setDiscountDesc(String.valueOf(discountMoney.setScale(0,BigDecimal.ROUND_HALF_UP)));
+                    String discountNote = omsWxAppCart.getName() + "【数量满" + ladder.getCount() + "立享" + ladder.getDiscount() + "折】";
+                    productDiscountDto.setDiscountNote(discountNote);
                 }
+
+                discountDtos.add(productDiscountDto);
             }
-            discountDtos.add(productDiscountDto);
+
         }
         allCartDiscountDto.setDiscountDtos(discountDtos);
 

@@ -68,7 +68,6 @@ public class WxPmsProductController {
   @RequestMapping(value = "/queryDiscount", method = RequestMethod.POST)
   @ResponseBody
   public CommonResult<AllCartDiscountDto> queryDiscount(@RequestBody OmsOrderPayParam omsOrderPayParam) {
-    List<PmsProduct> productList = Lists.newArrayList();
     AllCartDiscountDto allCartDiscountDto = productService.queryDiscount(omsOrderPayParam.getCarts(), omsOrderPayParam.getMemberId());
     return CommonResult.success(allCartDiscountDto);
   }

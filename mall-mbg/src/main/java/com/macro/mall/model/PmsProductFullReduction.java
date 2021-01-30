@@ -13,7 +13,17 @@ public class PmsProductFullReduction implements Serializable {
 
     private BigDecimal reducePrice;
 
+    private String discountDesc; //优惠金额描述
+
     private static final long serialVersionUID = 1L;
+
+    public String getDiscountDesc() {
+        return discountDesc;
+    }
+
+    public void setDiscountDesc(String discountDesc) {
+        this.discountDesc = discountDesc;
+    }
 
     public Long getId() {
         return id;
