@@ -8,6 +8,7 @@ import com.macro.mall.dto.*;
 import com.macro.mall.model.OmsOrder;
 import com.macro.mall.model.UmsMember;
 import com.macro.mall.service.OmsOrderService;
+import com.macro.mall.service.impl.OrderCombineManager;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;

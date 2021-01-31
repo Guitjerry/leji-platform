@@ -63,4 +63,6 @@ public interface OmsOrderService {
      * @return
      */
     int createOrder(OmsOrderPayParam omsOrderPayParam);
+
+    int remarkOrder(Long orderId, Double payFee);
 }

@@ -109,4 +109,15 @@ public class OmsOrderController {
         }
         return CommonResult.failed();
     }
+
+    @ApiOperation("标记订单")
+    @RequestMapping(value = "/remarkOrder", method = RequestMethod.POST)
+    @ResponseBody
+    public CommonResult remarkOrder(@RequestParam("id") Long orderId, @RequestParam("payFee")Double payFee) {
+        int count = orderService.remarkOrder(orderId, payFee);
+        if (count > 0) {
+            return CommonResult.success(count);
+        }
+        return CommonResult.failed();
+    }
 }

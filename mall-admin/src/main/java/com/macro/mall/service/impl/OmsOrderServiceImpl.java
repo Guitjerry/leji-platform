@@ -5,21 +5,23 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.github.pagehelper.PageHelper;
 import com.macro.mall.common.exception.Asserts;
+import com.macro.mall.common.util.CustomUUID;
 import com.macro.mall.constant.CommonConstant;
 import com.macro.mall.dao.OmsOrderDao;
 import com.macro.mall.dao.OmsOrderOperateHistoryDao;
 import com.macro.mall.dto.*;
+import com.macro.mall.enums.OrderPaySourceEnum;
 import com.macro.mall.enums.OrderStatusTypeEnum;
 import com.macro.mall.enums.PayTypeEnum;
-import com.macro.mall.mapper.OmsCartItemMapper;
-import com.macro.mall.mapper.OmsOrderMapper;
-import com.macro.mall.mapper.OmsOrderOperateHistoryMapper;
+import com.macro.mall.mapper.*;
 import com.macro.mall.model.*;
 import com.macro.mall.service.OmsOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -42,7 +44,14 @@ public class OmsOrderServiceImpl implements OmsOrderService {
     private OmsOrderOperateHistoryMapper orderOperateHistoryMapper;
     @Autowired
     private OmsCartItemMapper omsCartItemMapper;
-
+    @Autowired
+    private OrderCombineManager orderCombineManager;
+    @Autowired
+    private UmsMemberMapper umsMemberMapper;
+    @Autowired
+    private OmsOrderItemMapper omsOrderItemMapper;
+    @Autowired
+    private OmsOrderMapper omsOrderMapper;
     @Override
     public List<OmsOrder> list(OmsOrderQueryParam queryParam, Integer pageSize, Integer pageNum) {
         PageHelper.startPage(pageNum, pageSize);
@@ -162,7 +171,38 @@ public class OmsOrderServiceImpl implements OmsOrderService {
         return count;
     }
 
+    private void createAppCartByOrder(List<OmsWxAppCart> omsWxAppCarts) {
+        //记录购物车
+        omsWxAppCarts.forEach(omsWxAppCart -> {
+            //购物车
+            OmsCartItem omsCartItem = new OmsCartItem();
+            omsCartItem.setCreateDate(DateUtil.parse(DateUtil.now()));
+            omsCartItem.setPrice(BigDecimal.valueOf(omsWxAppCart.getPrice()));
+            omsCartItem.setProductBrand(String.valueOf(omsWxAppCart.getBrandId()));
+            omsCartItem.setProductName(omsWxAppCart.getProductCategoryName());
+            omsCartItem.setProductCategoryId(omsWxAppCart.getProductCategoryId());
+            omsCartItemMapper.insert(omsCartItem);
+        });
+    }
+
+    private void createOrderItemByOrder(List<OmsWxAppCart> omsWxAppCarts, OmsOrder omsOrder) {
+        omsWxAppCarts.forEach(omsWxAppCart -> {
+            OmsOrderItem omsOrderItem = new OmsOrderItem();
+            omsOrderItem.setProductSn(omsOrder.getOrderSn());
+            omsOrderItem.setOrderId(omsOrder.getId());
+            omsOrderItem.setProductId(omsWxAppCart.getId());
+            omsOrderItem.setProductPic(omsWxAppCart.getPic());
+            omsOrderItem.setProductName(omsWxAppCart.getName());
+            omsOrderItem.setProductPrice(BigDecimal.valueOf(omsWxAppCart.getPrice()));
+            omsOrderItem.setProductQuantity(omsWxAppCart.getCount());
+            omsOrderItem.setProductCategoryId(omsWxAppCart.getProductCategoryId());
+            omsOrderItemMapper.insertSelective(omsOrderItem);
+        });
+    }
+
+
     @Override
+    @Transactional
     public int createOrder(OmsOrderPayParam omsOrderPayParam) {
         //
         OmsCompanyAddress omsCompanyAddress =  omsOrderPayParam.getAddresses();
@@ -175,21 +215,23 @@ public class OmsOrderServiceImpl implements OmsOrderService {
         if (CollectionUtil.isEmpty(omsWxAppCarts)) {
             Asserts.fail("请选择商品后下单！");
         }
-        omsWxAppCarts.forEach(omsWxAppCart -> {
-            //购物车
-            OmsCartItem omsCartItem = new OmsCartItem();
-            omsCartItem.setCreateDate(DateUtil.parse(DateUtil.now()));
-            omsCartItem.setPrice(BigDecimal.valueOf(omsWxAppCart.getPrice()));
-            omsCartItem.setProductBrand(String.valueOf(omsWxAppCart.getBrandId()));
-            omsCartItem.setProductName(omsWxAppCart.getProductCategoryName());
-            omsCartItem.setProductCategoryId(Long.valueOf(omsWxAppCart.getProductCategoryId()));
-            omsCartItemMapper.insert(omsCartItem);
-            totalAmount.updateAndGet(v -> v + omsWxAppCart.getPrice());
-        });
-        omsOrder.setOrderSn(UUID.randomUUID().toString());
-        omsOrder.setCreateTime(DateUtil.parse(DateUtil.now()));
-        omsOrder.setTotalAmount(BigDecimal.valueOf(totalAmount.get()));
+        //优惠信息
+        AllCartDiscountDto allCartDiscountDto = orderCombineManager.queryDiscount(omsWxAppCarts, omsOrderPayParam.getMemberId());
+        //计算可获得积分
+
+        UmsMember member = umsMemberMapper.selectByPrimaryKey(omsOrderPayParam.getMemberId());
         omsOrder.setMemberId(omsOrderPayParam.getMemberId());
+        omsOrder.setCouponId(allCartDiscountDto.getCouponId());
+        omsOrder.setOrderSn(String.valueOf(CustomUUID.getInstance(0, 0).generate()));
+        omsOrder.setCreateTime(DateUtil.parse(DateUtil.now()));
+        omsOrder.setMemberUsername(member.getUsername());
+        omsOrder.setTotalAmount(BigDecimal.valueOf(allCartDiscountDto.getAllMoney()));
+        omsOrder.setPayAmount(BigDecimal.valueOf(allCartDiscountDto.getLastDiscountMoney()));
+        omsOrder.setPromotionAmount(BigDecimal.valueOf(allCartDiscountDto.getPromotionAmount()));
+        omsOrder.setCouponAmount(BigDecimal.valueOf(allCartDiscountDto.getCouponMoney()));
+        omsOrder.setPayType(PayTypeEnum.NOPAY.getKey());
+        omsOrder.setSourceType(OrderPaySourceEnum.WECHAT.getKey());
+        omsOrder.setStatus(OrderStatusTypeEnum.wait.getKey());
         omsOrder.setReceiverPhone(omsCompanyAddress.getPhone());
         omsOrder.setReceiverName(omsCompanyAddress.getName());
         omsOrder.setDeleteStatus(CommonConstant.FLAG_NO);
@@ -197,9 +239,19 @@ public class OmsOrderServiceImpl implements OmsOrderService {
         omsOrder.setReceiverCity(omsCompanyAddress.getCity());
         omsOrder.setReceiverRegion(omsCompanyAddress.getRegion());
         omsOrder.setReceiverDetailAddress(omsCompanyAddress.getDetailAddress());
-        omsOrder.setPayType(PayTypeEnum.NOPAY.getKey());
-        omsOrder.setStatus(OrderStatusTypeEnum.hasComplete.getKey());
-        omsOrder.setOrderType(CommonConstant.FLAG_YES);
-        return orderMapper.insert(omsOrder);
+        int count = orderMapper.insert(omsOrder);
+        //记录订单明细项
+        createOrderItemByOrder(omsWxAppCarts, omsOrder);
+        return  count;
+    }
+
+    @Override
+    public int remarkOrder(Long orderId, Double payFee) {
+        OmsOrder omsOrder = omsOrderMapper.selectByPrimaryKey(orderId);
+        omsOrder.setPayAmount(BigDecimal.valueOf(payFee));
+        omsOrder.setStatus(OrderStatusTypeEnum.waitSend.getKey());
+        int count = omsOrderMapper.updateByPrimaryKeySelective(omsOrder)
+        //开始打印订单
+        return count;
     }
 }
