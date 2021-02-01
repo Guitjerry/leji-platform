@@ -4,6 +4,7 @@ import com.macro.mall.common.api.CommonPage;
 import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.dto.*;
 import com.macro.mall.model.OmsOrder;
+import com.macro.mall.query.MarkOrderPayInfoQuery;
 import com.macro.mall.service.OmsOrderService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -28,7 +29,7 @@ public class OmsOrderController {
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     @ResponseBody
     public CommonResult<CommonPage<OmsOrder>> list(OmsOrderQueryParam queryParam,
-                                                   @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
+                                                   @RequestParam(value = "pageSize", defaultValue = "100") Integer pageSize,
                                                    @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
         List<OmsOrder> orderList = orderService.list(queryParam, pageSize, pageNum);
         return CommonResult.success(CommonPage.restPage(orderList));
@@ -113,11 +114,22 @@ public class OmsOrderController {
     @ApiOperation("标记订单")
     @RequestMapping(value = "/remarkOrder", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult remarkOrder(@RequestParam("id") Long orderId, @RequestParam("payFee")Double payFee) {
-        int count = orderService.remarkOrder(orderId, payFee);
+    public CommonResult remarkOrder(MarkOrderPayInfoQuery markOrderPayInfoQuery) {
+        int count = orderService.remarkOrder(markOrderPayInfoQuery);
         if (count > 0) {
             return CommonResult.success(count);
         }
         return CommonResult.failed();
     }
+
+  @ApiOperation("订单发货物流信息填写")
+  @RequestMapping(value = "/sendOrder", method = RequestMethod.POST)
+  @ResponseBody
+  public CommonResult sendOrder(OmsOrder omsOrder) {
+    int count = orderService.sendOrder(omsOrder);
+    if (count > 0) {
+      return CommonResult.success(count);
+    }
+    return CommonResult.failed();
+  }
 }

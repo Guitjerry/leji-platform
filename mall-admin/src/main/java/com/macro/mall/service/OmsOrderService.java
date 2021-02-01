@@ -2,6 +2,7 @@ package com.macro.mall.service;
 
 import com.macro.mall.dto.*;
 import com.macro.mall.model.OmsOrder;
+import com.macro.mall.query.MarkOrderPayInfoQuery;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -64,5 +65,12 @@ public interface OmsOrderService {
      */
     int createOrder(OmsOrderPayParam omsOrderPayParam);
 
-    int remarkOrder(Long orderId, Double payFee);
+    int remarkOrder(MarkOrderPayInfoQuery markOrderPayInfoQuery);
+
+  /**
+   * 发货更新物流信息
+   * @param omsOrder
+   * @return
+   */
+  int sendOrder(OmsOrder omsOrder);
 }

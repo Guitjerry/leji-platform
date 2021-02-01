@@ -15,6 +15,7 @@ import com.macro.mall.enums.OrderStatusTypeEnum;
 import com.macro.mall.enums.PayTypeEnum;
 import com.macro.mall.mapper.*;
 import com.macro.mall.model.*;
+import com.macro.mall.query.MarkOrderPayInfoQuery;
 import com.macro.mall.service.OmsOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -125,33 +126,21 @@ public class OmsOrderServiceImpl implements OmsOrderService {
         order.setModifyTime(new Date());
         int count = orderMapper.updateByPrimaryKeySelective(order);
         //插入操作记录
-        OmsOrderOperateHistory history = new OmsOrderOperateHistory();
-        history.setOrderId(receiverInfoParam.getOrderId());
-        history.setCreateTime(new Date());
-        history.setOperateMan("后台管理员");
-        history.setOrderStatus(receiverInfoParam.getStatus());
-        history.setNote("修改收货人信息");
-        orderOperateHistoryMapper.insert(history);
+        saveOrderHistory(receiverInfoParam.getOrderId(), receiverInfoParam.getStatus(), "修改收货人信息：");
         return count;
     }
 
     @Override
     public int updateMoneyInfo(OmsMoneyInfoParam moneyInfoParam) {
-        OmsOrder order = new OmsOrder();
-        order.setId(moneyInfoParam.getOrderId());
-        order.setFreightAmount(moneyInfoParam.getFreightAmount());
-        order.setDiscountAmount(moneyInfoParam.getDiscountAmount());
-        order.setModifyTime(new Date());
-        int count = orderMapper.updateByPrimaryKeySelective(order);
-        //插入操作记录
-        OmsOrderOperateHistory history = new OmsOrderOperateHistory();
-        history.setOrderId(moneyInfoParam.getOrderId());
-        history.setCreateTime(new Date());
-        history.setOperateMan("后台管理员");
-        history.setOrderStatus(moneyInfoParam.getStatus());
-        history.setNote("修改费用信息");
-        orderOperateHistoryMapper.insert(history);
-        return count;
+      OmsOrder order = new OmsOrder();
+      order.setId(moneyInfoParam.getOrderId());
+      order.setFreightAmount(moneyInfoParam.getFreightAmount());
+      order.setDiscountAmount(moneyInfoParam.getDiscountAmount());
+      order.setModifyTime(new Date());
+      int count = orderMapper.updateByPrimaryKeySelective(order);
+      //插入操作记录
+      saveOrderHistory(moneyInfoParam.getOrderId(), moneyInfoParam.getStatus(), "修改费用信息：");
+      return count;
     }
 
     @Override
@@ -162,12 +151,7 @@ public class OmsOrderServiceImpl implements OmsOrderService {
         order.setModifyTime(new Date());
         int count = orderMapper.updateByPrimaryKeySelective(order);
         OmsOrderOperateHistory history = new OmsOrderOperateHistory();
-        history.setOrderId(id);
-        history.setCreateTime(new Date());
-        history.setOperateMan("后台管理员");
-        history.setOrderStatus(status);
-        history.setNote("修改备注信息："+note);
-        orderOperateHistoryMapper.insert(history);
+        saveOrderHistory(id, status, "修改备注信息："+note);
         return count;
     }
 
@@ -192,6 +176,7 @@ public class OmsOrderServiceImpl implements OmsOrderService {
             omsOrderItem.setOrderId(omsOrder.getId());
             omsOrderItem.setProductId(omsWxAppCart.getId());
             omsOrderItem.setProductPic(omsWxAppCart.getPic());
+            omsOrderItem.setProductBrand(omsWxAppCart.getBrandName());
             omsOrderItem.setProductName(omsWxAppCart.getName());
             omsOrderItem.setProductPrice(BigDecimal.valueOf(omsWxAppCart.getPrice()));
             omsOrderItem.setProductQuantity(omsWxAppCart.getCount());
@@ -246,12 +231,33 @@ public class OmsOrderServiceImpl implements OmsOrderService {
     }
 
     @Override
-    public int remarkOrder(Long orderId, Double payFee) {
-        OmsOrder omsOrder = omsOrderMapper.selectByPrimaryKey(orderId);
-        omsOrder.setPayAmount(BigDecimal.valueOf(payFee));
+    public int remarkOrder(MarkOrderPayInfoQuery markOrderPayInfoQuery) {
+        //无效订单记录订单状态
+        OmsOrder omsOrder = omsOrderMapper.selectByPrimaryKey(markOrderPayInfoQuery.getOrderId());
+        omsOrder.setPayAmount(BigDecimal.valueOf(markOrderPayInfoQuery.getPayFee()));
         omsOrder.setStatus(OrderStatusTypeEnum.waitSend.getKey());
-        int count = omsOrderMapper.updateByPrimaryKeySelective(omsOrder)
+        int count = omsOrderMapper.updateByPrimaryKeySelective(omsOrder);
+
+        saveOrderHistory(markOrderPayInfoQuery.getOrderId(), omsOrder.getStatus(), "标记为正式订单");
         //开始打印订单
         return count;
     }
+
+  @Override
+  public int sendOrder(OmsOrder omsOrder) {
+    omsOrder.setStatus(OrderStatusTypeEnum.hasSend.getKey());
+    int count = omsOrderMapper.updateByPrimaryKeySelective(omsOrder);
+    saveOrderHistory(omsOrder.getId(), omsOrder.getStatus(), "填写发货物流信息");
+    return count;
+  }
+
+  private void saveOrderHistory(Long orderId, Integer status, String note) {
+    OmsOrderOperateHistory history = new OmsOrderOperateHistory();
+    history.setOrderId(orderId);
+    history.setCreateTime(new Date());
+    history.setOperateMan("后台管理员");
+    history.setOrderStatus(status);
+    history.setNote(note);
+    orderOperateHistoryMapper.insert(history);
+  }
 }
