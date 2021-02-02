@@ -26,6 +26,9 @@
         <if test="queryParam.createTime!=null and queryParam.createTime!=''">
             AND create_time LIKE concat(#{queryParam.createTime},"%")
         </if>
+      <if test="queryParam.memberId!=null and queryParam.memberId!=''">
+        AND member_id  = #{queryParam.memberId}
+      </if>
         <if test="queryParam.receiverKeyword!=null and queryParam.receiverKeyword!=''">
             AND (
             receiver_name LIKE concat("%",#{queryParam.receiverKeyword},"%")

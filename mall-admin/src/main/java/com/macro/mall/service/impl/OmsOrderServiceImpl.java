@@ -213,7 +213,9 @@ public class OmsOrderServiceImpl implements OmsOrderService {
         omsOrder.setTotalAmount(BigDecimal.valueOf(allCartDiscountDto.getAllMoney()));
         omsOrder.setPayAmount(BigDecimal.valueOf(allCartDiscountDto.getLastDiscountMoney()));
         omsOrder.setPromotionAmount(BigDecimal.valueOf(allCartDiscountDto.getPromotionAmount()));
-        omsOrder.setCouponAmount(BigDecimal.valueOf(allCartDiscountDto.getCouponMoney()));
+        if(ObjectUtil.isNotNull(allCartDiscountDto.getCouponMoney())) {
+          omsOrder.setCouponAmount(BigDecimal.valueOf(allCartDiscountDto.getCouponMoney()));
+        }
         omsOrder.setPayType(PayTypeEnum.NOPAY.getKey());
         omsOrder.setSourceType(OrderPaySourceEnum.WECHAT.getKey());
         omsOrder.setStatus(OrderStatusTypeEnum.wait.getKey());
@@ -236,6 +238,7 @@ public class OmsOrderServiceImpl implements OmsOrderService {
         OmsOrder omsOrder = omsOrderMapper.selectByPrimaryKey(markOrderPayInfoQuery.getOrderId());
         omsOrder.setPayAmount(BigDecimal.valueOf(markOrderPayInfoQuery.getPayFee()));
         omsOrder.setStatus(OrderStatusTypeEnum.waitSend.getKey());
+        omsOrder.setPayType(markOrderPayInfoQuery.getPayType());
         int count = omsOrderMapper.updateByPrimaryKeySelective(omsOrder);
 
         saveOrderHistory(markOrderPayInfoQuery.getOrderId(), omsOrder.getStatus(), "标记为正式订单");

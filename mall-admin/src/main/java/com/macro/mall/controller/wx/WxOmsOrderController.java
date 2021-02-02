@@ -49,7 +49,7 @@ public class WxOmsOrderController {
   @RequestMapping(value = "/list", method = RequestMethod.GET)
   @ResponseBody
   public CommonResult<CommonPage<OmsOrder>> list(OmsOrderQueryParam queryParam,
-    @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
+    @RequestParam(value = "pageSize", defaultValue = "100") Integer pageSize,
     @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
     List<OmsOrder> orderList = orderService.list(queryParam, pageSize, pageNum);
     return CommonResult.success(CommonPage.restPage(orderList));
