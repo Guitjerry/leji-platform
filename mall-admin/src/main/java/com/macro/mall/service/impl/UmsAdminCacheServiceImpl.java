@@ -1,5 +1,6 @@
 package com.macro.mall.service.impl;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.macro.mall.common.service.RedisService;
 import com.macro.mall.model.UmsAdmin;
 import com.macro.mall.service.UmsAdminCacheService;
@@ -34,7 +35,8 @@ public class UmsAdminCacheServiceImpl implements UmsAdminCacheService {
     @Override
     public UmsAdmin getAdmin(Long adminId) {
         String key = REDIS_DATABASE + ":" + REDIS_KEY_ADMIN + ":" + adminId;
-        return (UmsAdmin) redisService.get(key);
+        Object userAdminObj = redisService.get(key);
+        return ObjectUtil.isNotNull(userAdminObj)? (UmsAdmin) userAdminObj: null ;
     }
 
     @Override
