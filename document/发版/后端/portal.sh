@@ -1,2 +1,2 @@
-cd /usr/local/leji-background/leji-platform-mall-background/mall-portal/target
+cd /usr/local/Programs
 java -jar mall-portal-1.0-SNAPSHOT.jar &
