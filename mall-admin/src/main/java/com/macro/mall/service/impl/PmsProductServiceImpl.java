@@ -6,6 +6,7 @@ import cn.hutool.core.util.ObjectUtil;
 import com.github.pagehelper.PageHelper;
 import com.google.common.collect.Lists;
 import com.macro.mall.common.enums.CouponTypeEnum;
+import com.macro.mall.constant.CommonConstant;
 import com.macro.mall.dao.*;
 import com.macro.mall.dto.AllCartDiscountDto;
 import com.macro.mall.dto.CartDiscountQuery;
@@ -92,6 +93,7 @@ public class PmsProductServiceImpl implements PmsProductService {
         //创建商品
         PmsProduct product = productParam;
         product.setId(null);
+        product.setVerifyStatus(CommonConstant.FLAG_YES);
         productMapper.insertSelective(product);
         //根据促销类型设置价格：会员价格、阶梯价格、满减价格
         Long productId = product.getId();
@@ -229,7 +231,7 @@ public class PmsProductServiceImpl implements PmsProductService {
         PageHelper.startPage(pageNum, pageSize);
         PmsProductExample productExample = new PmsProductExample();
         PmsProductExample.Criteria criteria = productExample.createCriteria();
-        criteria.andDeleteStatusEqualTo(0);
+        criteria.andDeleteStatusEqualTo(0).andPublishStatusEqualTo(CommonConstant.FLAG_YES);
         if (productQueryParam.getPublishStatus() != null) {
             criteria.andPublishStatusEqualTo(productQueryParam.getPublishStatus());
         }
@@ -262,9 +264,9 @@ public class PmsProductServiceImpl implements PmsProductService {
         PageHelper.startPage(pageNum, pageSize);
         List<PmsProductParam> pmsProducts = Lists.newArrayList();
         if (type.equals(ListTypeEnum.NEW.getKey())) {
-            pmsProducts = productDao.listByNewProduct();
+            pmsProducts = productDao.listByNewProduct(CommonConstant.FLAG_YES);
         } else if (type.equals(ListTypeEnum.TEJIA.getKey())) {
-            pmsProducts = productDao.listByTejia();
+            pmsProducts = productDao.listByTejia(CommonConstant.FLAG_YES);
         }
         return pmsProducts;
     }

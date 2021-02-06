@@ -87,6 +87,10 @@
              inner join sms_home_new_product shnp on p.id = shnp.product_id and shnp.recommend_status=1
              left join sms_coupon_product_relation scpr on p.id =  scpr.product_id
              inner join sms_coupon sc on scpr.coupon_id = sc.id
+
+        <if test="publishStatus!=null and publishStatus!=''">
+            where p.publish_status #{publishStatus}
+        </if>
     </select>
     <select id="listByTejia" resultMap="updateInfoMap">
       SELECT *,
@@ -107,6 +111,9 @@
              inner join sms_home_recommend_product shrp on p.id = shrp.product_id and shnp.recommend_status=1
              left join sms_coupon_product_relation scpr on p.id =  scpr.product_id
              inner join sms_coupon sc on scpr.coupon_id = sc.id
+        <if test="publishStatus!=null and publishStatus!=''">
+            where p.publish_status #{publishStatus}
+        </if>
   </select>
 
   <select id="queryCartMemberCoupon" parameterType="com.macro.mall.dto.CartDiscountQuery" resultMap="CouponResultMap">
