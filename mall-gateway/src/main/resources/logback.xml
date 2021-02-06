@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="true">
+    <property name="APP" value="mall" />
+    <property name="MODULE_NAME" value="mall-gateway" />
+    <!-- 存放日志文件路径 -->
+<!--    <property name="LOG_HOME" value="C:/Users/duxact/Desktop/log/${APP_ID}" />-->
+    <property name="LOG_HOME" value="/usr/local/Programs/leji/log"/>
+    <property name="LOG_LEVEL" value="info"/>
+    <!-- ch.qos.logback.core.ConsoleAppender 控制台输出 -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>
+                %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger.%line - %msg%n
+            </Pattern>
+        </layout>
+    </appender>
+
+    <appender name="INFO_ONLINE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_HOME}/${MODULE_NAME}/${MODULE_NAME}.log</file>
+
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>
+                %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger.%line - %msg%n
+            </Pattern>
+        </encoder>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- rollover daily -->
+            <fileNamePattern>${LOG_HOME}/${MODULE_NAME}/${MODULE_NAME}.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>3</maxHistory>
+        </rollingPolicy>
+
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>${LOG_LEVEL}</level>
+        </filter>
+    </appender>
+
+    <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="INFO_ONLINE"/>
+        <neverBlock>true</neverBlock>
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>2048</queueSize>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="ASYNC"/>
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+</configuration>
