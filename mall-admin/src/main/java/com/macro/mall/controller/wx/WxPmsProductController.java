@@ -4,6 +4,7 @@ import cn.hutool.core.util.ObjectUtil;
 import com.google.common.collect.Lists;
 import com.macro.mall.common.api.CommonPage;
 import com.macro.mall.common.api.CommonResult;
+import com.macro.mall.common.util.BeanCopyUtil;
 import com.macro.mall.dto.AllCartDiscountDto;
 import com.macro.mall.dto.OmsOrderPayParam;
 import com.macro.mall.dto.PmsProductParam;
@@ -41,6 +42,9 @@ public class WxPmsProductController {
     List<PmsProductParam> productList = Lists.newArrayList();
     if (ObjectUtil.isNotNull(productQueryParam.getType())) {
       productList = productService.listByType(productQueryParam.getType(), pageSize, pageNum);
+    }else {
+      List<PmsProduct> pmsProducts = productService.list(productQueryParam, pageSize, pageNum);
+      productList = BeanCopyUtil.transform(pmsProducts, PmsProductParam.class);
     }
     return CommonResult.success(CommonPage.restPage(productList));
   }

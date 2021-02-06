@@ -223,6 +223,7 @@ public class OmsOrderServiceImpl implements OmsOrderService {
         }
         omsOrder.setPayType(PayTypeEnum.NOPAY.getKey());
         omsOrder.setSourceType(OrderPaySourceEnum.WECHAT.getKey());
+        omsOrder.setNote(omsOrderPayParam.getNote());
         omsOrder.setStatus(OrderStatusTypeEnum.wait.getKey());
         omsOrder.setReceiverPhone(omsCompanyAddress.getPhone());
         omsOrder.setReceiverName(omsCompanyAddress.getName());
@@ -234,6 +235,8 @@ public class OmsOrderServiceImpl implements OmsOrderService {
         int count = orderMapper.insert(omsOrder);
         //记录订单明细项
         createOrderItemByOrder(omsWxAppCarts, omsOrder);
+        //更新商品销量，更新商品库存
+
         return  count;
     }
 

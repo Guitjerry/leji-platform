@@ -18,6 +18,16 @@ public class OmsOrderPayParam {
     @ApiModelProperty(value = "购物车")
     private List<OmsWxAppCart> carts;
     private Long memberId;
+    @ApiModelProperty(value = "备注信息")
+    private String note;
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
 
     public Long getMemberId() {
         return memberId;

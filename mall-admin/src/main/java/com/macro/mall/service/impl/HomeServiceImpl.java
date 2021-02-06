@@ -1,6 +1,7 @@
 package com.macro.mall.service.impl;
 
 import cn.hutool.core.date.DateUtil;
+import com.google.common.collect.Lists;
 import com.macro.mall.constant.CommonConstant;
 import com.macro.mall.dao.OmsOrderDao;
 import com.macro.mall.dto.HomeResultDto;
@@ -50,11 +51,16 @@ public class HomeServiceImpl implements HomeService {
 
         //今日订单总数
         BigDecimal todayMoney = new BigDecimal(0L);
-        List<OmsOrder> todayOrders = omsOrders.stream().filter(omsOrder -> omsOrder.getCreateTime().getTime() == DateUtil.parse(DateUtil.now()).getTime()).collect(Collectors.toList());
+        List<OmsOrder> todayOrders = Lists.newArrayList();
+        for(OmsOrder omsOrder: omsOrders) {
+            Long orderCrtime = DateUtil.parse(DateUtil.format(omsOrder.getCreateTime(),"yyyyMMdd")).getTime();
+            Long currTime = DateUtil.parse(DateUtil.format(DateUtil.parseDate(DateUtil.now()),"yyyyMMdd")).getTime();
+            if(orderCrtime.equals(currTime)) {
+                todayOrders.add(omsOrder);
+                todayMoney =  todayMoney.add(omsOrder.getTotalAmount());
+            }
+        }
         homeResultDto.setTodayOrder(todayOrders.size());
-        todayOrders.forEach(omsOrder -> {
-            todayMoney.add(omsOrder.getTotalAmount());
-        });
         homeResultDto.setSaleOrder(todayMoney.doubleValue());
 
         //待付款订单

@@ -1,46 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.macro.mall.dao.PmsProductDao">
-    <resultMap id="updateInfoMap" type="com.macro.mall.dto.PmsProductResult" extends="com.macro.mall.mapper.PmsProductMapper.ResultMapWithBLOBs">
-        <result column="cateParentId" jdbcType="BIGINT" property="cateParentId" />
-        <result column="is_show" jdbcType="INTEGER" property="isShow" />
-        <result column="id" jdbcType="BIGINT" property="id" />
-        <collection property="productLadderList" columnPrefix="ladder_" resultMap="com.macro.mall.mapper.PmsProductLadderMapper.BaseResultMap">
+    <resultMap id="updateInfoMap" type="com.macro.mall.dto.PmsProductResult"
+               extends="com.macro.mall.mapper.PmsProductMapper.ResultMapWithBLOBs">
+        <result column="cateParentId" jdbcType="BIGINT" property="cateParentId"/>
+        <result column="is_show" jdbcType="INTEGER" property="isShow"/>
+        <result column="id" jdbcType="BIGINT" property="id"/>
+        <collection property="productLadderList" columnPrefix="ladder_"
+                    resultMap="com.macro.mall.mapper.PmsProductLadderMapper.BaseResultMap">
         </collection>
-        <collection property="productFullReductionList" columnPrefix="full_" resultMap="com.macro.mall.mapper.PmsProductFullReductionMapper.BaseResultMap">
+        <collection property="productFullReductionList" columnPrefix="full_"
+                    resultMap="com.macro.mall.mapper.PmsProductFullReductionMapper.BaseResultMap">
         </collection>
-        <collection property="memberPriceList" columnPrefix="member_" resultMap="com.macro.mall.mapper.PmsMemberPriceMapper.BaseResultMap">
+        <collection property="memberPriceList" columnPrefix="member_"
+                    resultMap="com.macro.mall.mapper.PmsMemberPriceMapper.BaseResultMap">
         </collection>
-        <collection property="skuStockList" columnPrefix="sku_" resultMap="com.macro.mall.mapper.PmsSkuStockMapper.BaseResultMap">
+        <collection property="skuStockList" columnPrefix="sku_"
+                    resultMap="com.macro.mall.mapper.PmsSkuStockMapper.BaseResultMap">
         </collection>
-        <collection property="couponList" columnPrefix="coupon_" resultMap="com.macro.mall.mapper.SmsCouponMapper.BaseResultMap">
+        <collection property="couponList" columnPrefix="coupon_"
+                    resultMap="com.macro.mall.mapper.SmsCouponMapper.BaseResultMap">
         </collection>
-        <collection property="productAttributeValueList" columnPrefix="attribute_" resultMap="com.macro.mall.mapper.PmsProductAttributeValueMapper.BaseResultMap">
+        <collection property="productAttributeValueList" columnPrefix="attribute_"
+                    resultMap="com.macro.mall.mapper.PmsProductAttributeValueMapper.BaseResultMap">
         </collection>
-        <collection property="subjectProductRelationList" column="{productId=id}" select="selectSubjectProductRelationByProductId"/>
-        <collection property="prefrenceAreaProductRelationList" column="{productId=id}" select="selectPrefrenceAreaProductRelationByProductId"/>
+        <collection property="subjectProductRelationList" column="{productId=id}"
+                    select="selectSubjectProductRelationByProductId"/>
+        <collection property="prefrenceAreaProductRelationList" column="{productId=id}"
+                    select="selectPrefrenceAreaProductRelationByProductId"/>
 
     </resultMap>
     <resultMap id="CouponResultMap" type="com.macro.mall.model.SmsCoupon">
-      <id column="id" jdbcType="BIGINT" property="id" />
-      <result column="type" jdbcType="INTEGER" property="type" />
-      <result column="name" jdbcType="VARCHAR" property="name" />
-      <result column="platform" jdbcType="INTEGER" property="platform" />
-      <result column="count" jdbcType="INTEGER" property="count" />
-      <result column="amount" jdbcType="DECIMAL" property="amount" />
-      <result column="per_limit" jdbcType="INTEGER" property="perLimit" />
-      <result column="min_point" jdbcType="DECIMAL" property="minPoint" />
-      <result column="start_time" jdbcType="TIMESTAMP" property="startTime" />
-      <result column="end_time" jdbcType="TIMESTAMP" property="endTime" />
-      <result column="use_type" jdbcType="INTEGER" property="useType" />
-      <result column="note" jdbcType="VARCHAR" property="note" />
-      <result column="publish_count" jdbcType="INTEGER" property="publishCount" />
-      <result column="use_count" jdbcType="INTEGER" property="useCount" />
-      <result column="receive_count" jdbcType="INTEGER" property="receiveCount" />
-      <result column="enable_time" jdbcType="TIMESTAMP" property="enableTime" />
-      <result column="code" jdbcType="VARCHAR" property="code" />
-      <result column="member_level" jdbcType="INTEGER" property="memberLevel" />
-      <result column="cid" jdbcType="BIGINT" property="cid" />
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="type" jdbcType="INTEGER" property="type"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="platform" jdbcType="INTEGER" property="platform"/>
+        <result column="count" jdbcType="INTEGER" property="count"/>
+        <result column="amount" jdbcType="DECIMAL" property="amount"/>
+        <result column="per_limit" jdbcType="INTEGER" property="perLimit"/>
+        <result column="min_point" jdbcType="DECIMAL" property="minPoint"/>
+        <result column="start_time" jdbcType="TIMESTAMP" property="startTime"/>
+        <result column="end_time" jdbcType="TIMESTAMP" property="endTime"/>
+        <result column="use_type" jdbcType="INTEGER" property="useType"/>
+        <result column="note" jdbcType="VARCHAR" property="note"/>
+        <result column="publish_count" jdbcType="INTEGER" property="publishCount"/>
+        <result column="use_count" jdbcType="INTEGER" property="useCount"/>
+        <result column="receive_count" jdbcType="INTEGER" property="receiveCount"/>
+        <result column="enable_time" jdbcType="TIMESTAMP" property="enableTime"/>
+        <result column="code" jdbcType="VARCHAR" property="code"/>
+        <result column="member_level" jdbcType="INTEGER" property="memberLevel"/>
+        <result column="cid" jdbcType="BIGINT" property="cid"/>
     </resultMap>
 
 
@@ -61,10 +70,12 @@
         LEFT JOIN pms_product_attribute_value a ON a.product_id=p.id
         WHERE p.id=#{id};
     </select>
-    <select id="selectSubjectProductRelationByProductId" resultMap="com.macro.mall.mapper.CmsSubjectProductRelationMapper.BaseResultMap">
+    <select id="selectSubjectProductRelationByProductId"
+            resultMap="com.macro.mall.mapper.CmsSubjectProductRelationMapper.BaseResultMap">
         select * from cms_subject_product_relation where product_id=#{productId}
     </select>
-    <select id="selectPrefrenceAreaProductRelationByProductId" resultMap="com.macro.mall.mapper.CmsPrefrenceAreaProductRelationMapper.BaseResultMap">
+    <select id="selectPrefrenceAreaProductRelationByProductId"
+            resultMap="com.macro.mall.mapper.CmsPrefrenceAreaProductRelationMapper.BaseResultMap">
         select * from cms_prefrence_area_product_relation where product_id=#{productId}
     </select>
 
@@ -88,9 +99,10 @@
              left join sms_coupon_product_relation scpr on p.id =  scpr.product_id
              inner join sms_coupon sc on scpr.coupon_id = sc.id
 
-        <if test="publishStatus!=null and publishStatus!=''">
-            where p.publish_status #{publishStatus}
-        </if>
+      where p.publish_status = 1
+      and p.verify_status=1
+      and p.delete_status=0
+
     </select>
     <select id="listByTejia" resultMap="updateInfoMap">
       SELECT *,
@@ -111,34 +123,34 @@
              inner join sms_home_recommend_product shrp on p.id = shrp.product_id and shnp.recommend_status=1
              left join sms_coupon_product_relation scpr on p.id =  scpr.product_id
              inner join sms_coupon sc on scpr.coupon_id = sc.id
-        <if test="publishStatus!=null and publishStatus!=''">
-            where p.publish_status #{publishStatus}
-        </if>
+       where p.publish_status = 1
+      and p.verify_status=1
+      and p.delete_status=0
   </select>
 
-  <select id="queryCartMemberCoupon" parameterType="com.macro.mall.dto.CartDiscountQuery" resultMap="CouponResultMap">
-    select sc.*, scpr.product_id as cid from sms_coupon sc
-                       inner join sms_coupon_history sch on sch.coupon_id= sc.id
-                       inner join sms_coupon_product_relation scpr on sch.coupon_id = scpr.coupon_id
-    where sch.member_id=#{userId}
-      and scpr.product_id in
-    <foreach close=")" collection="productIds" item="item" open="(" separator=",">
-      #{item}
-    </foreach>
-    union all
-    select sc.*, scpc.product_category_id as cid from sms_coupon sc
-    inner join sms_coupon_history sch on sch.coupon_id= sc.id
-    inner join sms_coupon_product_category_relation scpc on sch.coupon_id = scpc.coupon_id
-    where sch.member_id=#{userId}
-    and scpc.product_category_id in
-    <foreach close=")" collection="categoryIds" item="item" open="(" separator=",">
-      #{item}
-    </foreach>
-    union all
-    select sc.*, '' as cid from sms_coupon sc
-                       inner join sms_coupon_history sch on sch.coupon_id= sc.id
-    where sch.member_id=#{userId}
-      and not exists(select 1 from sms_coupon_product_relation scpr where sch.coupon_id = scpr.coupon_id)
-      and not exists(select 1 from sms_coupon_product_category_relation scpc where sch.coupon_id = scpc.coupon_id)
-  </select>
+    <select id="queryCartMemberCoupon" parameterType="com.macro.mall.dto.CartDiscountQuery" resultMap="CouponResultMap">
+        select sc.*, scpr.product_id as cid from sms_coupon sc
+        inner join sms_coupon_history sch on sch.coupon_id= sc.id
+        inner join sms_coupon_product_relation scpr on sch.coupon_id = scpr.coupon_id
+        where sch.member_id=#{userId}
+        and scpr.product_id in
+        <foreach close=")" collection="productIds" item="item" open="(" separator=",">
+            #{item}
+        </foreach>
+        union all
+        select sc.*, scpc.product_category_id as cid from sms_coupon sc
+        inner join sms_coupon_history sch on sch.coupon_id= sc.id
+        inner join sms_coupon_product_category_relation scpc on sch.coupon_id = scpc.coupon_id
+        where sch.member_id=#{userId}
+        and scpc.product_category_id in
+        <foreach close=")" collection="categoryIds" item="item" open="(" separator=",">
+            #{item}
+        </foreach>
+        union all
+        select sc.*, '' as cid from sms_coupon sc
+        inner join sms_coupon_history sch on sch.coupon_id= sc.id
+        where sch.member_id=#{userId}
+        and not exists(select 1 from sms_coupon_product_relation scpr where sch.coupon_id = scpr.coupon_id)
+        and not exists(select 1 from sms_coupon_product_category_relation scpc where sch.coupon_id = scpc.coupon_id)
+    </select>
 </mapper>
