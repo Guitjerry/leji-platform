@@ -73,4 +73,6 @@ public interface OmsOrderService {
    * @return
    */
   int sendOrder(OmsOrder omsOrder);
+
+  void printOrder(Long orderId) throws Exception;
 }

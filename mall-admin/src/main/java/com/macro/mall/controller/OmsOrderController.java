@@ -4,6 +4,7 @@ import com.macro.mall.common.api.CommonPage;
 import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.dto.*;
 import com.macro.mall.model.OmsOrder;
+import com.macro.mall.print.PrintCustomer;
 import com.macro.mall.query.MarkOrderPayInfoQuery;
 import com.macro.mall.service.OmsOrderService;
 import io.swagger.annotations.Api;
@@ -24,6 +25,8 @@ import java.util.List;
 public class OmsOrderController {
     @Autowired
     private OmsOrderService orderService;
+    @Autowired
+    private PrintCustomer printCustomer;
 
     @ApiOperation("查询订单")
     @RequestMapping(value = "/list", method = RequestMethod.GET)
@@ -132,4 +135,16 @@ public class OmsOrderController {
     }
     return CommonResult.failed();
   }
+
+    @ApiOperation("打印订单")
+    @RequestMapping(value = "/printOrder/{orderId}", method = RequestMethod.GET)
+    @ResponseBody
+    public CommonResult printOrder(@PathVariable Long orderId) {
+        try {
+            orderService.printOrder(orderId);
+        } catch (Exception e) {
+            return CommonResult.failed(e.getMessage());
+        }
+        return CommonResult.success(orderId);
+    }
 }

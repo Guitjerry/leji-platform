@@ -1,5 +1,6 @@
 package com.macro.mall.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -15,6 +16,8 @@ import com.macro.mall.enums.OrderStatusTypeEnum;
 import com.macro.mall.enums.PayTypeEnum;
 import com.macro.mall.mapper.*;
 import com.macro.mall.model.*;
+import com.macro.mall.print.CustomerTicketPrint;
+import com.macro.mall.print.PrintCustomer;
 import com.macro.mall.query.MarkOrderPayInfoQuery;
 import com.macro.mall.service.OmsOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +56,8 @@ public class OmsOrderServiceImpl implements OmsOrderService {
     private OmsOrderItemMapper omsOrderItemMapper;
     @Autowired
     private OmsOrderMapper omsOrderMapper;
+    @Autowired
+    private PrintCustomer printCustomer;
     @Override
     public List<OmsOrder> list(OmsOrderQueryParam queryParam, Integer pageSize, Integer pageNum) {
         PageHelper.startPage(pageNum, pageSize);
@@ -254,7 +259,24 @@ public class OmsOrderServiceImpl implements OmsOrderService {
     return count;
   }
 
-  private void saveOrderHistory(Long orderId, Integer status, String note) {
+    @Override
+    public void printOrder(Long orderId) throws Exception {
+        //订单
+        OmsOrder omsOrder = omsOrderMapper.selectByPrimaryKey(orderId);
+        //订单明细
+        OmsOrderItemExample itemExample = new OmsOrderItemExample();
+        itemExample.or().andOrderIdEqualTo(orderId);
+        List<OmsOrderItem> omsOrderItems = omsOrderItemMapper.selectByExample(itemExample);
+        //打印对象
+        OmsOrderPrintDto omsOrderPrintDto = new OmsOrderPrintDto();
+        BeanUtil.copyProperties(omsOrder, omsOrderPrintDto);
+        omsOrderPrintDto.setOmsOrderItems(omsOrderItems);
+        CustomerTicketPrint customerTicketPrint = new CustomerTicketPrint(omsOrderPrintDto);
+        printCustomer.setCustomerTicketPrint(customerTicketPrint);
+        printCustomer.PrintCustomer();
+    }
+
+    private void saveOrderHistory(Long orderId, Integer status, String note) {
     OmsOrderOperateHistory history = new OmsOrderOperateHistory();
     history.setOrderId(orderId);
     history.setCreateTime(new Date());
