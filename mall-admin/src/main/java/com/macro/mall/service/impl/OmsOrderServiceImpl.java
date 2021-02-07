@@ -58,6 +58,9 @@ public class OmsOrderServiceImpl implements OmsOrderService {
     private OmsOrderMapper omsOrderMapper;
     @Autowired
     private PrintCustomer printCustomer;
+    @Autowired
+    private PmsProductMapper pmsProductMapper;
+
     @Override
     public List<OmsOrder> list(OmsOrderQueryParam queryParam, Integer pageSize, Integer pageNum) {
         PageHelper.startPage(pageNum, pageSize);
@@ -96,7 +99,7 @@ public class OmsOrderServiceImpl implements OmsOrderService {
             history.setCreateTime(new Date());
             history.setOperateMan("后台管理员");
             history.setOrderStatus(4);
-            history.setNote("订单关闭:"+note);
+            history.setNote("订单关闭:" + note);
             return history;
         }).collect(Collectors.toList());
         orderOperateHistoryDao.insertList(historyList);
@@ -137,15 +140,15 @@ public class OmsOrderServiceImpl implements OmsOrderService {
 
     @Override
     public int updateMoneyInfo(OmsMoneyInfoParam moneyInfoParam) {
-      OmsOrder order = new OmsOrder();
-      order.setId(moneyInfoParam.getOrderId());
-      order.setFreightAmount(moneyInfoParam.getFreightAmount());
-      order.setDiscountAmount(moneyInfoParam.getDiscountAmount());
-      order.setModifyTime(new Date());
-      int count = orderMapper.updateByPrimaryKeySelective(order);
-      //插入操作记录
-      saveOrderHistory(moneyInfoParam.getOrderId(), moneyInfoParam.getStatus(), "修改费用信息：");
-      return count;
+        OmsOrder order = new OmsOrder();
+        order.setId(moneyInfoParam.getOrderId());
+        order.setFreightAmount(moneyInfoParam.getFreightAmount());
+        order.setDiscountAmount(moneyInfoParam.getDiscountAmount());
+        order.setModifyTime(new Date());
+        int count = orderMapper.updateByPrimaryKeySelective(order);
+        //插入操作记录
+        saveOrderHistory(moneyInfoParam.getOrderId(), moneyInfoParam.getStatus(), "修改费用信息：");
+        return count;
     }
 
     @Override
@@ -156,7 +159,7 @@ public class OmsOrderServiceImpl implements OmsOrderService {
         order.setModifyTime(new Date());
         int count = orderMapper.updateByPrimaryKeySelective(order);
         OmsOrderOperateHistory history = new OmsOrderOperateHistory();
-        saveOrderHistory(id, status, "修改备注信息："+note);
+        saveOrderHistory(id, status, "修改备注信息：" + note);
         return count;
     }
 
@@ -190,13 +193,34 @@ public class OmsOrderServiceImpl implements OmsOrderService {
         });
     }
 
+    private void updateGoodByOrder(List<OmsWxAppCart> omsWxAppCarts, UmsMember umsMember) {
+        Integer integration = 0;
+        for (OmsWxAppCart omsWxAppCart : omsWxAppCarts) {
+            PmsProduct pmsProduct = pmsProductMapper.selectByPrimaryKey(omsWxAppCart.getId());
+            Integer payCount = omsWxAppCart.getCount();//买的商品数量
+            Integer allCount = pmsProduct.getStock();//商品总库存
+            Integer saleCount = pmsProduct.getSale();//销量
+            pmsProduct.setSale(payCount + saleCount);
+            pmsProduct.setStock(allCount + payCount);
+            pmsProductMapper.updateByPrimaryKeySelective(pmsProduct);
+            Integer giftPoint = pmsProduct.getGiftPoint();
+            if (ObjectUtil.isNotNull(giftPoint)) {
+                integration = integration + payCount * giftPoint;
+            }
+        }
+        if(integration>0) {
+            umsMember.setIntegration(integration);
+            umsMemberMapper.updateByPrimaryKeySelective(umsMember);
+        }
+    }
+
 
     @Override
     @Transactional
     public int createOrder(OmsOrderPayParam omsOrderPayParam) {
         //
-        OmsCompanyAddress omsCompanyAddress =  omsOrderPayParam.getAddresses();
-        if(ObjectUtil.isNull(omsCompanyAddress)) {
+        OmsCompanyAddress omsCompanyAddress = omsOrderPayParam.getAddresses();
+        if (ObjectUtil.isNull(omsCompanyAddress)) {
             Asserts.fail("请选择地址！");
         }
         OmsOrder omsOrder = new OmsOrder();
@@ -218,8 +242,8 @@ public class OmsOrderServiceImpl implements OmsOrderService {
         omsOrder.setTotalAmount(BigDecimal.valueOf(allCartDiscountDto.getAllMoney()));
         omsOrder.setPayAmount(BigDecimal.valueOf(allCartDiscountDto.getLastDiscountMoney()));
         omsOrder.setPromotionAmount(BigDecimal.valueOf(allCartDiscountDto.getPromotionAmount()));
-        if(ObjectUtil.isNotNull(allCartDiscountDto.getCouponMoney())) {
-          omsOrder.setCouponAmount(BigDecimal.valueOf(allCartDiscountDto.getCouponMoney()));
+        if (ObjectUtil.isNotNull(allCartDiscountDto.getCouponMoney())) {
+            omsOrder.setCouponAmount(BigDecimal.valueOf(allCartDiscountDto.getCouponMoney()));
         }
         omsOrder.setPayType(PayTypeEnum.NOPAY.getKey());
         omsOrder.setSourceType(OrderPaySourceEnum.WECHAT.getKey());
@@ -235,9 +259,9 @@ public class OmsOrderServiceImpl implements OmsOrderService {
         int count = orderMapper.insert(omsOrder);
         //记录订单明细项
         createOrderItemByOrder(omsWxAppCarts, omsOrder);
-        //更新商品销量，更新商品库存
-
-        return  count;
+        //更新商品销量，更新商品库存,更新用户积分
+        updateGoodByOrder(omsWxAppCarts, member);
+        return count;
     }
 
     @Override
@@ -254,13 +278,13 @@ public class OmsOrderServiceImpl implements OmsOrderService {
         return count;
     }
 
-  @Override
-  public int sendOrder(OmsOrder omsOrder) {
-    omsOrder.setStatus(OrderStatusTypeEnum.hasSend.getKey());
-    int count = omsOrderMapper.updateByPrimaryKeySelective(omsOrder);
-    saveOrderHistory(omsOrder.getId(), omsOrder.getStatus(), "填写发货物流信息");
-    return count;
-  }
+    @Override
+    public int sendOrder(OmsOrder omsOrder) {
+        omsOrder.setStatus(OrderStatusTypeEnum.hasSend.getKey());
+        int count = omsOrderMapper.updateByPrimaryKeySelective(omsOrder);
+        saveOrderHistory(omsOrder.getId(), omsOrder.getStatus(), "填写发货物流信息");
+        return count;
+    }
 
     @Override
     public void printOrder(Long orderId) throws Exception {
@@ -280,12 +304,12 @@ public class OmsOrderServiceImpl implements OmsOrderService {
     }
 
     private void saveOrderHistory(Long orderId, Integer status, String note) {
-    OmsOrderOperateHistory history = new OmsOrderOperateHistory();
-    history.setOrderId(orderId);
-    history.setCreateTime(new Date());
-    history.setOperateMan("后台管理员");
-    history.setOrderStatus(status);
-    history.setNote(note);
-    orderOperateHistoryMapper.insert(history);
-  }
+        OmsOrderOperateHistory history = new OmsOrderOperateHistory();
+        history.setOrderId(orderId);
+        history.setCreateTime(new Date());
+        history.setOperateMan("后台管理员");
+        history.setOrderStatus(status);
+        history.setNote(note);
+        orderOperateHistoryMapper.insert(history);
+    }
 }
