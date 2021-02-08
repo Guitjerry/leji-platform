@@ -62,15 +62,11 @@ public class UmsMember implements Serializable {
 
     @ApiModelProperty(value = "小程序openId")
     private String openId;
+
+    @ApiModelProperty(value = "1店铺管理员")
+    private Integer postion;
+
     private static final long serialVersionUID = 1L;
-
-    public String getOpenId() {
-        return openId;
-    }
-
-    public void setOpenId(String openId) {
-        this.openId = openId;
-    }
 
     public Long getId() {
         return id;
@@ -224,6 +220,22 @@ public class UmsMember implements Serializable {
         this.historyIntegration = historyIntegration;
     }
 
+    public String getOpenId() {
+        return openId;
+    }
+
+    public void setOpenId(String openId) {
+        this.openId = openId;
+    }
+
+    public Integer getPostion() {
+        return postion;
+    }
+
+    public void setPostion(Integer postion) {
+        this.postion = postion;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -249,6 +261,8 @@ public class UmsMember implements Serializable {
         sb.append(", growth=").append(growth);
         sb.append(", luckeyCount=").append(luckeyCount);
         sb.append(", historyIntegration=").append(historyIntegration);
+        sb.append(", openId=").append(openId);
+        sb.append(", postion=").append(postion);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();

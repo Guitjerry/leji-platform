@@ -3,10 +3,13 @@ package com.macro.mall.service.impl;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.crypto.digest.BCrypt;
+import com.github.pagehelper.PageHelper;
 import com.macro.mall.constant.CommonConstant;
 import com.macro.mall.mapper.UmsMemberMapper;
 import com.macro.mall.model.UmsMember;
 import com.macro.mall.model.UmsMemberExample;
+import com.macro.mall.model.UmsMemberExample.Criteria;
+import com.macro.mall.query.UmsMemberQuery;
 import com.macro.mall.service.UmsMemberService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +28,6 @@ public class UmsMemberServiceImpl implements UmsMemberService {
     private static final Logger LOGGER = LoggerFactory.getLogger(UmsMemberServiceImpl.class);
     @Autowired
     private UmsMemberMapper memberMapper;
-
     @Override
     public UmsMember register(UmsMember umsMember) {
         umsMember.setCreateTime(new Date());
@@ -62,5 +64,24 @@ public class UmsMemberServiceImpl implements UmsMemberService {
     public void update(UmsMember umsMember) {
         memberMapper.updateByPrimaryKeySelective(umsMember);
     }
+
+  @Override
+  public List<UmsMember> list(Integer pageNum, Integer pageSize, UmsMemberQuery umsMemberQuery) {
+    PageHelper.startPage(pageNum, pageSize);
+    UmsMemberExample umsMemberExample= new UmsMemberExample();
+    Criteria criteria = umsMemberExample.or();
+    if(ObjectUtil.isNotNull(umsMemberQuery.getUsername())) {
+      criteria.andUsernameLike(umsMemberQuery.getUsername());
+    }
+    if(ObjectUtil.isNotNull(umsMemberQuery.getPhone()))
+
+  }
+
+  @Override
+  public void configAdmin(Long memberId) {
+    UmsMember umsMember = memberMapper.selectByPrimaryKey(memberId);
+    umsMember.setPostion(CommonConstant.FLAG_YES);
+    memberMapper.updateByPrimaryKey(umsMember);
+  }
 
 }

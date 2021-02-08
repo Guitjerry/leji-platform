@@ -1,6 +1,9 @@
 package com.macro.mall.service;
 
+import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.model.UmsMember;
+import com.macro.mall.query.UmsMemberQuery;
+import java.util.List;
 
 /**
  * 会员管理Service
@@ -12,4 +15,8 @@ public interface UmsMemberService {
     UmsMember getByOpenId(String openId);
 
     void update(UmsMember umsMember);
+
+    List<UmsMember> list(Integer pageNum, Integer pageSize, UmsMemberQuery umsMember);
+
+    void configAdmin(Long memberId);
 }
