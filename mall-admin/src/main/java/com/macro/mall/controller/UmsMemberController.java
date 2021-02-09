@@ -33,4 +33,14 @@ public class UmsMemberController {
     @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
     return CommonResult.success(umsMemberService.list(pageNum, pageSize, umsMemberQuery));
   }
+
+  @ApiOperation("设置店长")
+  @RequestMapping(value = "/configAdmin", method = RequestMethod.GET)
+  @ResponseBody
+  public CommonResult configAdmin(Long memberId) {
+    umsMemberService.configAdmin(memberId)
+    return CommonResult.success("ok");
+  }
+
+
 }
