@@ -38,7 +38,7 @@ public class UmsMemberController {
   @RequestMapping(value = "/configAdmin", method = RequestMethod.GET)
   @ResponseBody
   public CommonResult configAdmin(Long memberId) {
-    umsMemberService.configAdmin(memberId)
+    umsMemberService.configAdmin(memberId);
     return CommonResult.success("ok");
   }
 

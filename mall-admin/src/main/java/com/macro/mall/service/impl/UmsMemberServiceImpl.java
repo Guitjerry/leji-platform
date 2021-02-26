@@ -73,8 +73,10 @@ public class UmsMemberServiceImpl implements UmsMemberService {
     if(ObjectUtil.isNotNull(umsMemberQuery.getUsername())) {
       criteria.andUsernameLike(umsMemberQuery.getUsername());
     }
-    if(ObjectUtil.isNotNull(umsMemberQuery.getPhone()))
-
+    if(ObjectUtil.isNotNull(umsMemberQuery.getPhone())) {
+        criteria.andPhoneEqualTo(umsMemberQuery.getPhone());
+    }
+    return  memberMapper.selectByExample(umsMemberExample);
   }
 
   @Override

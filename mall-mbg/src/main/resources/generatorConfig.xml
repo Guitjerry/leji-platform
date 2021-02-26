@@ -30,12 +30,12 @@
             <property name="nullCatalogMeansCurrent" value="true" />
         </jdbcConnection>
 
-        <javaModelGenerator targetPackage="com.macro.mall.model" targetProject="C:\Users\duxact\Desktop\乐记\leji-platform-mall-background\mall-mbg\src\main\java"/>
+        <javaModelGenerator targetPackage="com.macro.mall.model" targetProject="F:\项目\乐记\leji-platform\mall-mbg\src\main\java\com\macro\mall\mall-mbg\src\main\java"/>
 
-        <sqlMapGenerator targetPackage="com.macro.mall.mapper" targetProject="C:\Users\duxact\Desktop\乐记\leji-platform-mall-background\mall-mbg\src\main\resources"/>
+        <sqlMapGenerator targetPackage="com.macro.mall.mapper" targetProject="F:\项目\乐记\leji-platform\mall-mbg\src\main\java\com\macro\mall\mall-mbg\src\main\resources"/>
 
         <javaClientGenerator type="XMLMAPPER" targetPackage="com.macro.mall.mapper"
-                             targetProject="C:\Users\duxact\Desktop\乐记\leji-platform-mall-background\mall-mbg\src\main\java"/>
+                             targetProject="F:\项目\乐记\leji-platform\mall-mbg\src\main\java\com\macro\mall\mall-mbg\src\main\java"/>
         <!--生成全部表tableName设为%-->
         <table tableName="ums_member">
             <generatedKey column="id" sqlStatement="MySql" identity="true"/>
