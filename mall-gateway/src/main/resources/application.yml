@@ -1,5 +1,5 @@
 server:
-  port: 80
+  port: 8201
 spring:
   cloud:
     gateway:
@@ -42,7 +42,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: 'http://8.134.14.222/mall-auth/rsa/publicKey' #配置RSA的公钥访问地址
+          jwk-set-uri: 'http://8.134.14.222:8201/mall-auth/rsa/publicKey' #配置RSA的公钥访问地址
   redis:
     database: 0
     port: 6379
