@@ -8,4 +8,4 @@ spring:
         file-extension: yaml
 logging:
   level:
-    root: debug
+    root: warn
