@@ -1,12 +1,9 @@
-cd /usr/local/leji-background/leji-platform-mall-background
+cd cd /usr/local/leji/platform/leji-platform
 git pull origin master
 mvn clean install -D skipTests
-mv /usr/local/leji-background/leji-platform-mall-background/mall-auth/target/mall-auth-1.0-SNAPSHOT.jar /usr/local/Programs
-mv /usr/local/leji-background/leji-platform-mall-background/mall-gateway/target/mall-gateway-1.0-SNAPSHOT.jar /usr/local/Programs
-mv /usr/local/leji-background/leji-platform-mall-background/mall-portal/target/mall-portal-1.0-SNAPSHOT.jar /usr/local/Programs
-mv /usr/local/leji-background/leji-platform-mall-background/mall-admin/target/mall-admin-1.0-SNAPSHOT.jar /usr/local/Programs
-cd /usr/local/Programs
-java -jar mall-auth-1.0-SNAPSHOT.jar &
-java -jar mall-gateway-1.0-SNAPSHOT.jar &
-java -jar mall-portal-1.0-SNAPSHOT.jar &
-java -jar mall-admin-1.0-SNAPSHOT.jar &
+cd /usr/local/leji/platform/leji-platform/mall-auth/target
+java -jar mall-auth-1.0-SNAPSHOT.jar
+cd /usr/local/leji/platform/leji-platform/mall-gateway/target
+java -jar mall-gateway-1.0-SNAPSHOT.jar
+cd /usr/local/leji/platform/leji-platform/mall-addmin/target
+java -jar mall-admin-1.0-SNAPSHOT.jar
