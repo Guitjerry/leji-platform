@@ -58,17 +58,12 @@ public class UmsAdminController {
     @ApiOperation(value = "获取当前登录用户信息")
     @RequestMapping(value = "/info", method = RequestMethod.GET)
     @ResponseBody
-    public CommonResult getAdminInfo() {
-        UmsAdmin umsAdmin = adminService.getCurrentAdmin();
+    public CommonResult getAdminInfo(Long userId) {
+        UmsAdmin umsAdmin = adminService.getItem(userId);
         Map<String, Object> data = new HashMap<>();
         data.put("username", umsAdmin.getUsername());
+        data.put("userId", umsAdmin.getId());
         data.put("menus", roleService.getMenuList(umsAdmin.getId()));
-        data.put("icon", umsAdmin.getIcon());
-        List<UmsRole> roleList = adminService.getRoleList(umsAdmin.getId());
-        if(CollUtil.isNotEmpty(roleList)){
-            List<String> roles = roleList.stream().map(UmsRole::getName).collect(Collectors.toList());
-            data.put("roles",roles);
-        }
         return CommonResult.success(data);
     }
 

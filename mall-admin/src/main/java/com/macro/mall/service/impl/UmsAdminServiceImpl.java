@@ -23,6 +23,7 @@ import com.macro.mall.model.*;
 import com.macro.mall.service.AuthService;
 import com.macro.mall.service.UmsAdminCacheService;
 import com.macro.mall.service.UmsAdminService;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -122,21 +123,16 @@ public class UmsAdminServiceImpl implements UmsAdminService {
 
     @Override
     public CommonResult login(String username, String password) {
-        if(StrUtil.isEmpty(username)||StrUtil.isEmpty(password)){
+        if (StrUtil.isEmpty(username) || StrUtil.isEmpty(password)) {
             Asserts.fail("用户名或密码不能为空！");
         }
-        Map<String, String> params = new HashMap<>();
-        params.put("client_id", AuthConstant.ADMIN_CLIENT_ID);
-        params.put("client_secret","123456");
-        params.put("grant_type","password");
-        params.put("username",username);
-        params.put("password",password);
-        CommonResult restResult = authService.getAccessToken(params);
-        if(ResultCode.SUCCESS.getCode()==restResult.getCode()&&restResult.getData()!=null){
-//            updateLoginTimeByUsername(username);
-            insertLoginLog(username);
+        UmsAdminExample adminExample = new UmsAdminExample();
+        adminExample.or().andUsernameEqualTo(username).andPasswordEqualTo(DigestUtils.md5Hex(password).toString());
+        List<UmsAdmin> admins = adminMapper.selectByExample(adminExample);
+        if(CollUtil.isEmpty(admins)) {
+            Asserts.fail("用户名或者密码错误");
         }
-        return restResult;
+        return CommonResult.success(admins.get(0).getId());
     }
 
     /**
