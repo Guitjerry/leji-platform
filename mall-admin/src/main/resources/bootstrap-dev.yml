@@ -1,11 +1,3 @@
-spring:
-  cloud:
-    nacos:
-      discovery:
-        server-addr: http://118.178.143.233:8848
-      config:
-        server-addr: http://118.178.143.233:8848
-        file-extension: yaml
 logging:
   level:
     root: warn
