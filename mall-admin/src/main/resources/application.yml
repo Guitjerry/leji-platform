@@ -54,7 +54,7 @@ aliyun:
     policy:
       expire: 300 # 签名有效期(S)
     maxSize: 10 # 上传文件大小(M)
-    callback: http://8.134.14.222:8080/aliyun/oss/callback # 文件上传成功后的回调地址
+    callback: http://118.178.143.233:8080/aliyun/oss/callback # 文件上传成功后的回调地址
     dir:
       prefix: mall/images/ # 上传文件夹路径前缀
 minio:

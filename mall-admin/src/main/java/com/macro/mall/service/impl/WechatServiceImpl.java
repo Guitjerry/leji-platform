@@ -1,7 +1,8 @@
 package com.macro.mall.service.impl;
 
 import cn.hutool.core.codec.Base32;
-import com.alibaba.fastjson.JSONObject;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.macro.mall.common.constant.AuthConstant;
 import com.macro.mall.dto.SessionDto;
 import com.macro.mall.service.WechatService;
@@ -31,10 +32,10 @@ public class WechatServiceImpl implements WechatService {
             HttpResponse response = ApacheHttpUtil.doGet("https://api.weixin.qq.com", "/sns/jscode2session" + path, "GET", new HashMap<>(), null);
             String jsonString = EntityUtils.toString(response.getEntity());
             Assert.notNull(jsonString, "OpenId查询异常");
-            JSONObject responseJsonObj = JSONObject.parseObject(jsonString);
-            log.info("responseJsonObj {}", responseJsonObj.toJSONString());
-            String openId = responseJsonObj.getString("openid");
-            String sessionKey = responseJsonObj.getString("session_key");
+            JSONObject responseJsonObj = JSONUtil.parseObj(jsonString);
+            log.info("responseJsonObj {}", responseJsonObj.toString());
+            String openId = responseJsonObj.getStr("openid");
+            String sessionKey = responseJsonObj.getStr("session_key");
             SessionDto sessionDto = new SessionDto();
             if (StringUtils.isEmpty(openId)) {
                 Assert.notNull(openId, "OpenId查询异常");
