@@ -53,12 +53,12 @@ public interface AuthConstant {
      */
     String USER_TOKEN_HEADER = "user";
 
-    String appId = "wx80a2e9b5aa4a7050";//base32加密
+    String appId = "O54DQMDBGJSTSYRVMFQTIYJXGA2TA";//base32加密
 
-    String secret = "c6722ec744ae5937373ad386d36a905e";//base32加密
+    String secret = "MM3DOMRSMVRTONBUMFSTKOJTG4ZTOM3BMQZTQNTEGM3GCOJQGVSQ";//base32加密
 
     public static void main(String[] args) {
-        String aes = Base32.encode("528346fcccaa1895befa81c86923305e");
+        String aes = Base32.encode("c6722ec744ae5937373ad386d36a905e");
         System.out.println("key.." + aes.toString());
 
         String password = new String(Base32.decode(aes));
