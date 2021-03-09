@@ -79,4 +79,13 @@ public interface PmsProductService {
     List<PmsProductParam> listByType(Integer type, Integer pageSize, Integer pageNum);
 
     AllCartDiscountDto queryDiscount(List<OmsWxAppCart> carts, Long memberId);
+
+    /**
+     * 后台设置新品时，查出的非新品商品
+     * @param productQueryParam
+     * @param pageSize
+     * @param pageNum
+     * @return
+     */
+    List<PmsProduct> chooseUnNewGood(PmsProductQueryParam productQueryParam, Integer pageSize, Integer pageNum);
 }

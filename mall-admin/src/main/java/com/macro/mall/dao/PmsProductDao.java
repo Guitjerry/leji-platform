@@ -2,6 +2,7 @@ package com.macro.mall.dao;
 
 import com.macro.mall.dto.CartDiscountQuery;
 import com.macro.mall.dto.PmsProductParam;
+import com.macro.mall.dto.PmsProductQueryParam;
 import com.macro.mall.dto.PmsProductResult;
 import com.macro.mall.model.PmsProduct;
 import com.macro.mall.model.SmsCoupon;
@@ -24,4 +25,6 @@ public interface PmsProductDao {
     List<PmsProductParam> listByTejia(Integer publishStatus);
 
     List<SmsCoupon> queryCartMemberCoupon(CartDiscountQuery cartDiscountQuery);
+
+    List<PmsProduct> chooseUnNewGood(PmsProductQueryParam productQueryParam);
 }

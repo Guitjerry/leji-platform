@@ -141,4 +141,14 @@ public class PmsProductController {
             return CommonResult.failed();
         }
     }
+
+    @ApiOperation("查询未选择新品")
+    @RequestMapping(value = "/chooseUnNewGood", method = RequestMethod.POST)
+    @ResponseBody
+    public CommonResult updateDeleteStatus(PmsProductQueryParam productQueryParam,
+                                           @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
+                                           @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
+        List<PmsProduct> productList = productService.chooseUnNewGood(productQueryParam, pageSize, pageNum);
+        return CommonResult.success(CommonPage.restPage(productList));
+    }
 }
