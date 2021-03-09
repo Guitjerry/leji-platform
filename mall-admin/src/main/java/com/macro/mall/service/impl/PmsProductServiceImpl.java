@@ -99,10 +99,21 @@ public class PmsProductServiceImpl implements PmsProductService {
         Long productId = product.getId();
         //会员价格
         relateAndInsertList(memberPriceDao, productParam.getMemberPriceList(), productId);
+        List<PmsProductLadder> pmsProductLadders = productParam.getProductLadderList();
+        if(CollUtil.isNotEmpty(pmsProductLadders)) {
+            pmsProductLadders = pmsProductLadders.stream().filter(pmsProductLadder -> pmsProductLadder.getCount() > 0).collect(Collectors.toList());
+        }
+
+        List<PmsProductFullReduction> pmsProductFullReductions = productParam.getProductFullReductionList();
+        if(CollUtil.isNotEmpty(pmsProductFullReductions)) {
+            pmsProductFullReductions = pmsProductFullReductions.stream()
+                    .filter(pmsProductFullReduction -> pmsProductFullReduction.getFullPrice()
+                            .compareTo(BigDecimal.ZERO) > 0).collect(Collectors.toList());
+        }
         //阶梯价格
-        relateAndInsertList(productLadderDao, productParam.getProductLadderList(), productId);
+        relateAndInsertList(productLadderDao, pmsProductLadders, productId);
         //满减价格
-        relateAndInsertList(productFullReductionDao, productParam.getProductFullReductionList(), productId);
+        relateAndInsertList(productFullReductionDao, pmsProductFullReductions, productId);
         //处理sku的编码
         handleSkuStockCode(productParam.getSkuStockList(), productId);
         //添加sku库存信息
@@ -274,6 +285,12 @@ public class PmsProductServiceImpl implements PmsProductService {
     @Override
     public AllCartDiscountDto queryDiscount(List<OmsWxAppCart> carts, Long memberId) {
         return orderCombineManager.queryDiscount(carts,memberId);
+    }
+
+    @Override
+    public List<PmsProduct> chooseUnNewGood(PmsProductQueryParam productQueryParam, Integer pageSize, Integer pageNum) {
+        PageHelper.startPage(pageNum, pageSize);
+        return productDao.chooseUnNewGood(productQueryParam);
     }
 
     @Override
