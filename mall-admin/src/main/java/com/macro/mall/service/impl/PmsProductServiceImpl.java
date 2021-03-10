@@ -268,15 +268,18 @@ public class PmsProductServiceImpl implements PmsProductService {
         if (productQueryParam.getProductCategoryId() != null) {
             criteria.andProductCategoryIdEqualTo(productQueryParam.getProductCategoryId());
         }
-        if(productQueryParam.getSortType().equals(SortStatusTypeEnum.DEFAULT.getKey())) {
-            productExample.setOrderByClause("sort desc");
+        if(ObjectUtil.isNotNull(productQueryParam.getSortType())) {
+            if(productQueryParam.getSortType().equals(SortStatusTypeEnum.DEFAULT.getKey())) {
+                productExample.setOrderByClause("sort desc");
+            }
+            if(productQueryParam.getSortType().equals(SortStatusTypeEnum.SALECOUNT.getKey())) {
+                productExample.setOrderByClause("sale desc");
+            }
+            if(productQueryParam.getSortType().equals(SortStatusTypeEnum.PRICE.getKey())) {
+                productExample.setOrderByClause("price asc");
+            }
         }
-        if(productQueryParam.getSortType().equals(SortStatusTypeEnum.SALECOUNT.getKey())) {
-            productExample.setOrderByClause("sale desc");
-        }
-        if(productQueryParam.getSortType().equals(SortStatusTypeEnum.PRICE.getKey())) {
-            productExample.setOrderByClause("price asc");
-        }
+
         return productMapper.selectByExample(productExample);
     }
 
