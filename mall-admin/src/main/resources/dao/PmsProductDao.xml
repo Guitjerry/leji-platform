@@ -86,7 +86,15 @@
       where p.publish_status = 1
       and p.verify_status=1
       and p.delete_status=0
-
+        <if test="sortType!=null and sortType==0">
+            order by p.sort desc
+        </if>
+        <if test="sortType!=null and sortType==1">
+            order by p.sale desc
+        </if>
+        <if test="sortType!=null and sortType==2">
+            order by p.price desc
+        </if>
     </select>
     <select id="listByTejia" resultMap="updateInfoMap">
       SELECT p.*
@@ -95,6 +103,15 @@
        where p.publish_status = 1
       and p.verify_status=1
       and p.delete_status=0
+        <if test="sortType!=null and sortType==0">
+            order by p.sort desc
+        </if>
+        <if test="sortType!=null and sortType==1">
+            order by p.sale desc
+        </if>
+        <if test="sortType!=null and sortType==2">
+            order by p.price asc
+        </if>
   </select>
 
     <select id="queryCartMemberCoupon" parameterType="com.macro.mall.dto.CartDiscountQuery" resultMap="CouponResultMap">

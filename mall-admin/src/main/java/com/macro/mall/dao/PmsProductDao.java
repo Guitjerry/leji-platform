@@ -20,9 +20,9 @@ public interface PmsProductDao {
      */
     PmsProductResult getUpdateInfo(@Param("id") Long id);
 
-    List<PmsProductParam> listByNewProduct(Integer publishStatus);
+    List<PmsProductParam> listByNewProduct(@Param(value = "publishStatus") Integer publishStatus,@Param(value = "sortType") Integer sortType);
 
-    List<PmsProductParam> listByTejia(Integer publishStatus);
+    List<PmsProductParam> listByTejia(@Param(value = "publishStatus") Integer publishStatus,@Param(value = "sortType") Integer sortType);
 
     List<SmsCoupon> queryCartMemberCoupon(CartDiscountQuery cartDiscountQuery);
 

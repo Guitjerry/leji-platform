@@ -29,4 +29,6 @@ public class PmsProductQueryParam {
     private String productCategoryName;
     @ApiModelProperty("列表条件 1新品 2特价")
     private Integer type;
+    @ApiModelProperty("排序条件 0综合 1销量 2价格")
+    private Integer sortType;
 }

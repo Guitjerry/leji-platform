@@ -41,7 +41,7 @@ public class WxPmsProductController {
     @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
     List<PmsProductParam> productList = Lists.newArrayList();
     if (ObjectUtil.isNotNull(productQueryParam.getType())) {
-      productList = productService.listByType(productQueryParam.getType(), pageSize, pageNum);
+      productList = productService.listByType(productQueryParam, pageSize, pageNum);
     }else {
       List<PmsProduct> pmsProducts = productService.list(productQueryParam, pageSize, pageNum);
       productList = BeanCopyUtil.transform(pmsProducts, PmsProductParam.class);

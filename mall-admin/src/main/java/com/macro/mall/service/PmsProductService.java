@@ -76,7 +76,7 @@ public interface PmsProductService {
 
     List<PmsProduct> listByBrandId(Long brandId);
 
-    List<PmsProductParam> listByType(Integer type, Integer pageSize, Integer pageNum);
+    List<PmsProductParam> listByType(PmsProductQueryParam pmsProductQueryParam, Integer pageSize, Integer pageNum);
 
     AllCartDiscountDto queryDiscount(List<OmsWxAppCart> carts, Long memberId);
 

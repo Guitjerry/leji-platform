@@ -16,6 +16,7 @@ import com.macro.mall.dto.PmsProductQueryParam;
 import com.macro.mall.dto.PmsProductResult;
 import com.macro.mall.dto.ProductDiscountDto;
 import com.macro.mall.enums.ListTypeEnum;
+import com.macro.mall.enums.SortStatusTypeEnum;
 import com.macro.mall.mapper.*;
 import com.macro.mall.model.*;
 import com.macro.mall.service.PmsProductService;
@@ -267,17 +268,26 @@ public class PmsProductServiceImpl implements PmsProductService {
         if (productQueryParam.getProductCategoryId() != null) {
             criteria.andProductCategoryIdEqualTo(productQueryParam.getProductCategoryId());
         }
+        if(productQueryParam.getSortType().equals(SortStatusTypeEnum.DEFAULT.getKey())) {
+            productExample.setOrderByClause("sort desc");
+        }
+        if(productQueryParam.getSortType().equals(SortStatusTypeEnum.SALECOUNT.getKey())) {
+            productExample.setOrderByClause("sale desc");
+        }
+        if(productQueryParam.getSortType().equals(SortStatusTypeEnum.PRICE.getKey())) {
+            productExample.setOrderByClause("price asc");
+        }
         return productMapper.selectByExample(productExample);
     }
 
     @Override
-    public List<PmsProductParam> listByType(Integer type, Integer pageSize, Integer pageNum) {
+    public List<PmsProductParam> listByType(PmsProductQueryParam pmsProductQueryParam, Integer pageSize, Integer pageNum) {
         PageHelper.startPage(pageNum, pageSize);
         List<PmsProductParam> pmsProducts = Lists.newArrayList();
-        if (type.equals(ListTypeEnum.NEW.getKey())) {
-            pmsProducts = productDao.listByNewProduct(CommonConstant.FLAG_YES);
-        } else if (type.equals(ListTypeEnum.TEJIA.getKey())) {
-            pmsProducts = productDao.listByTejia(CommonConstant.FLAG_YES);
+        if (pmsProductQueryParam.getType().equals(ListTypeEnum.NEW.getKey())) {
+            pmsProducts = productDao.listByNewProduct(CommonConstant.FLAG_YES, pmsProductQueryParam.getSortType());
+        } else if (pmsProductQueryParam.getType().equals(ListTypeEnum.TEJIA.getKey())) {
+            pmsProducts = productDao.listByTejia(CommonConstant.FLAG_YES, pmsProductQueryParam.getSortType());
         }
         return pmsProducts;
     }
