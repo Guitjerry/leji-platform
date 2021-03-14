@@ -2617,4 +2617,4 @@ create index sms_coupon_product_relation_product_id_index
 create index sms_coupon_product_relation_coupon_id_index
     on sms_coupon_product_relation (coupon_id);
 alter table ums_member
-    add postion int(2) null comment '1店铺管理员';
+    add position int(2) null comment '1店铺管理员';

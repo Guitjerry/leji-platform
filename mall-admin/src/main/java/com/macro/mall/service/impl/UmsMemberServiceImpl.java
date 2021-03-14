@@ -82,8 +82,13 @@ public class UmsMemberServiceImpl implements UmsMemberService {
   @Override
   public void configAdmin(Long memberId) {
     UmsMember umsMember = memberMapper.selectByPrimaryKey(memberId);
-    umsMember.setPostion(CommonConstant.FLAG_YES);
+    umsMember.setPosition(CommonConstant.FLAG_YES);
     memberMapper.updateByPrimaryKey(umsMember);
   }
+
+    @Override
+    public UmsMember queryById(Long id) {
+        return memberMapper.selectByPrimaryKey(id);
+    }
 
 }

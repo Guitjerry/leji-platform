@@ -19,4 +19,6 @@ public interface UmsMemberService {
     List<UmsMember> list(Integer pageNum, Integer pageSize, UmsMemberQuery umsMember);
 
     void configAdmin(Long memberId);
+
+    UmsMember queryById(Long id);
 }

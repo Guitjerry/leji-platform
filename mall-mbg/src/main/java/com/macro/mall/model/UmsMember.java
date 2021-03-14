@@ -64,7 +64,7 @@ public class UmsMember implements Serializable {
     private String openId;
 
     @ApiModelProperty(value = "1店铺管理员")
-    private Integer postion;
+    private Integer position;
 
     private static final long serialVersionUID = 1L;
 
@@ -228,12 +228,12 @@ public class UmsMember implements Serializable {
         this.openId = openId;
     }
 
-    public Integer getPostion() {
-        return postion;
+    public Integer getPosition() {
+        return position;
     }
 
-    public void setPostion(Integer postion) {
-        this.postion = postion;
+    public void setPosition(Integer position) {
+        this.position = position;
     }
 
     @Override
@@ -262,7 +262,7 @@ public class UmsMember implements Serializable {
         sb.append(", luckeyCount=").append(luckeyCount);
         sb.append(", historyIntegration=").append(historyIntegration);
         sb.append(", openId=").append(openId);
-        sb.append(", postion=").append(postion);
+        sb.append(", position=").append(position);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();

@@ -1422,63 +1422,63 @@ public class UmsMemberExample {
             return (Criteria) this;
         }
 
-        public Criteria andPostionIsNull() {
-            addCriterion("postion is null");
+        public Criteria andPositionIsNull() {
+            addCriterion("position is null");
             return (Criteria) this;
         }
 
-        public Criteria andPostionIsNotNull() {
-            addCriterion("postion is not null");
+        public Criteria andPositionIsNotNull() {
+            addCriterion("position is not null");
             return (Criteria) this;
         }
 
-        public Criteria andPostionEqualTo(Integer value) {
-            addCriterion("postion =", value, "postion");
+        public Criteria andPositionEqualTo(Integer value) {
+            addCriterion("position =", value, "postion");
             return (Criteria) this;
         }
 
-        public Criteria andPostionNotEqualTo(Integer value) {
-            addCriterion("postion <>", value, "postion");
+        public Criteria andPositionNotEqualTo(Integer value) {
+            addCriterion("position <>", value, "postion");
             return (Criteria) this;
         }
 
-        public Criteria andPostionGreaterThan(Integer value) {
-            addCriterion("postion >", value, "postion");
+        public Criteria andPositionGreaterThan(Integer value) {
+            addCriterion("position >", value, "postion");
             return (Criteria) this;
         }
 
-        public Criteria andPostionGreaterThanOrEqualTo(Integer value) {
-            addCriterion("postion >=", value, "postion");
+        public Criteria andPositionGreaterThanOrEqualTo(Integer value) {
+            addCriterion("position >=", value, "postion");
             return (Criteria) this;
         }
 
-        public Criteria andPostionLessThan(Integer value) {
-            addCriterion("postion <", value, "postion");
+        public Criteria andPositionLessThan(Integer value) {
+            addCriterion("position <", value, "postion");
             return (Criteria) this;
         }
 
-        public Criteria andPostionLessThanOrEqualTo(Integer value) {
-            addCriterion("postion <=", value, "postion");
+        public Criteria andPositionLessThanOrEqualTo(Integer value) {
+            addCriterion("position <=", value, "postion");
             return (Criteria) this;
         }
 
-        public Criteria andPostionIn(List<Integer> values) {
-            addCriterion("postion in", values, "postion");
+        public Criteria andPositionIn(List<Integer> values) {
+            addCriterion("position in", values, "postion");
             return (Criteria) this;
         }
 
-        public Criteria andPostionNotIn(List<Integer> values) {
-            addCriterion("postion not in", values, "postion");
+        public Criteria andPositionNotIn(List<Integer> values) {
+            addCriterion("position not in", values, "postion");
             return (Criteria) this;
         }
 
-        public Criteria andPostionBetween(Integer value1, Integer value2) {
-            addCriterion("postion between", value1, value2, "postion");
+        public Criteria andPositionBetween(Integer value1, Integer value2) {
+            addCriterion("position between", value1, value2, "postion");
             return (Criteria) this;
         }
 
-        public Criteria andPostionNotBetween(Integer value1, Integer value2) {
-            addCriterion("postion not between", value1, value2, "postion");
+        public Criteria andPositionNotBetween(Integer value1, Integer value2) {
+            addCriterion("position not between", value1, value2, "position");
             return (Criteria) this;
         }
     }
