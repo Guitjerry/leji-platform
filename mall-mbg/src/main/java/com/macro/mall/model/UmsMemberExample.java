@@ -1433,47 +1433,47 @@ public class UmsMemberExample {
         }
 
         public Criteria andPositionEqualTo(Integer value) {
-            addCriterion("position =", value, "postion");
+            addCriterion("position =", value, "position");
             return (Criteria) this;
         }
 
         public Criteria andPositionNotEqualTo(Integer value) {
-            addCriterion("position <>", value, "postion");
+            addCriterion("position <>", value, "position");
             return (Criteria) this;
         }
 
         public Criteria andPositionGreaterThan(Integer value) {
-            addCriterion("position >", value, "postion");
+            addCriterion("position >", value, "position");
             return (Criteria) this;
         }
 
         public Criteria andPositionGreaterThanOrEqualTo(Integer value) {
-            addCriterion("position >=", value, "postion");
+            addCriterion("position >=", value, "position");
             return (Criteria) this;
         }
 
         public Criteria andPositionLessThan(Integer value) {
-            addCriterion("position <", value, "postion");
+            addCriterion("position <", value, "position");
             return (Criteria) this;
         }
 
         public Criteria andPositionLessThanOrEqualTo(Integer value) {
-            addCriterion("position <=", value, "postion");
+            addCriterion("position <=", value, "position");
             return (Criteria) this;
         }
 
         public Criteria andPositionIn(List<Integer> values) {
-            addCriterion("position in", values, "postion");
+            addCriterion("position in", values, "position");
             return (Criteria) this;
         }
 
         public Criteria andPositionNotIn(List<Integer> values) {
-            addCriterion("position not in", values, "postion");
+            addCriterion("position not in", values, "position");
             return (Criteria) this;
         }
 
         public Criteria andPositionBetween(Integer value1, Integer value2) {
-            addCriterion("position between", value1, value2, "postion");
+            addCriterion("position between", value1, value2, "position");
             return (Criteria) this;
         }
 
