@@ -2,8 +2,11 @@ package com.macro.mall.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.BCrypt;
 import com.github.pagehelper.PageHelper;
+import com.macro.mall.common.constant.AuthConstant;
+import com.macro.mall.common.util.TokenUtil;
 import com.macro.mall.constant.CommonConstant;
 import com.macro.mall.mapper.UmsMemberMapper;
 import com.macro.mall.model.UmsMember;
@@ -15,7 +18,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 
@@ -28,10 +33,13 @@ public class UmsMemberServiceImpl implements UmsMemberService {
     private static final Logger LOGGER = LoggerFactory.getLogger(UmsMemberServiceImpl.class);
     @Autowired
     private UmsMemberMapper memberMapper;
+    @Autowired
+    private HttpServletRequest request;
     @Override
     public UmsMember register(UmsMember umsMember) {
         umsMember.setCreateTime(new Date());
-        umsMember.setStatus(CommonConstant.FLAG_YES);
+        //未审核用户
+        umsMember.setStatus(CommonConstant.FLAG_NO);
         if(ObjectUtil.isNotNull(umsMember.getUsername())) {
             //查询是否有相同用户名的用户
             UmsMemberExample example = new UmsMemberExample();
@@ -89,6 +97,15 @@ public class UmsMemberServiceImpl implements UmsMemberService {
     @Override
     public UmsMember queryById(Long id) {
         return memberMapper.selectByPrimaryKey(id);
+    }
+
+    @Override
+    public UmsMember getCurrMember() {
+        String token = request.getHeader(AuthConstant.JWT_TOKEN_HEADER);
+        Assert.isTrue(StrUtil.isNotEmpty(token), "获取token失败");
+        String openId = TokenUtil.validateToken(token.replace(AuthConstant.JWT_TOKEN_PREFIX, ""));
+        Assert.isTrue(StrUtil.isNotEmpty(openId), "获取用户信息失败");
+        return getByOpenId(openId);
     }
 
 }

@@ -5,15 +5,14 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.github.pagehelper.PageHelper;
 import com.google.common.collect.Lists;
+import com.macro.mall.common.util.TokenUtil;
 import com.macro.mall.constant.CommonConstant;
 import com.macro.mall.dto.SmsHomeNewProductDto;
 import com.macro.mall.mapper.PmsProductMapper;
 import com.macro.mall.mapper.SmsHomeNewProductMapper;
-import com.macro.mall.model.PmsProduct;
-import com.macro.mall.model.PmsProductExample;
-import com.macro.mall.model.SmsHomeNewProduct;
-import com.macro.mall.model.SmsHomeNewProductExample;
+import com.macro.mall.model.*;
 import com.macro.mall.service.SmsHomeNewProductService;
+import com.macro.mall.service.UmsMemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -33,6 +32,8 @@ public class SmsHomeNewProductServiceImpl implements SmsHomeNewProductService {
     private SmsHomeNewProductMapper homeNewProductMapper;
     @Autowired
     private PmsProductMapper pmsProductMapper;
+    @Autowired
+    private UmsMemberService memberService;
     @Override
     public int create(List<SmsHomeNewProduct> homeNewProductList) {
         for (SmsHomeNewProduct SmsHomeNewProduct : homeNewProductList) {
@@ -92,6 +93,8 @@ public class SmsHomeNewProductServiceImpl implements SmsHomeNewProductService {
 
     @Override
     public List<SmsHomeNewProductDto> listWx(String productName, Integer recommendStatus) {
+        UmsMember umsMember = memberService.getCurrMember();
+        Integer checked = umsMember.getStatus();
         SmsHomeNewProductExample example = new SmsHomeNewProductExample();
         SmsHomeNewProductExample.Criteria criteria = example.createCriteria();
         if(!StringUtils.isEmpty(productName)){
@@ -117,6 +120,7 @@ public class SmsHomeNewProductServiceImpl implements SmsHomeNewProductService {
                 if(ObjectUtil.isNotNull(pmsProduct)) {
                     BeanUtil.copyProperties(pmsProduct, smsHomeNewProductDto);
                 }
+                smsHomeNewProductDto.setIsShow(checked);
                 return smsHomeNewProductDto;
 
             }).collect(Collectors.toList());

@@ -21,4 +21,10 @@ public interface UmsMemberService {
     void configAdmin(Long memberId);
 
     UmsMember queryById(Long id);
+
+    /**
+     * 获取小程序当前登录会员
+     * @return
+     */
+    UmsMember getCurrMember();
 }

@@ -12,6 +12,7 @@ import com.macro.mall.mapper.PmsProductMapper;
 import com.macro.mall.mapper.SmsHomeRecommendProductMapper;
 import com.macro.mall.model.*;
 import com.macro.mall.service.SmsHomeRecommendProductService;
+import com.macro.mall.service.UmsMemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -31,6 +32,8 @@ public class SmsHomeRecommendProductServiceImpl implements SmsHomeRecommendProdu
     private SmsHomeRecommendProductMapper recommendProductMapper;
     @Autowired
     private PmsProductMapper pmsProductMapper;
+    @Autowired
+    private UmsMemberService memberService;
 
     @Override
     public int create(List<SmsHomeRecommendProduct> homeRecommendProductList) {
@@ -90,6 +93,8 @@ public class SmsHomeRecommendProductServiceImpl implements SmsHomeRecommendProdu
 
     @Override
     public List<SmsHomeRecommendProductDto> listWx(String productName, Integer recommendStatus) {
+        UmsMember umsMember = memberService.getCurrMember();
+        Integer checked = umsMember.getStatus();
         SmsHomeRecommendProductExample example = new SmsHomeRecommendProductExample();
         SmsHomeRecommendProductExample.Criteria criteria = example.createCriteria();
         if(!StringUtils.isEmpty(productName)){
@@ -105,7 +110,7 @@ public class SmsHomeRecommendProductServiceImpl implements SmsHomeRecommendProdu
             List<PmsProduct> pmsProducts = findAllPmsProduct(productIds);
             Map<Long,PmsProduct> pmsProductMap =
                     pmsProducts.stream().collect(Collectors.toMap(PmsProduct::getId, Function.identity()));
-
+            //商品
             resultHomeRecommendProductDto =  smsHomeRecommendProducts.stream().map(smsHomeRecommendProduct -> {
                 PmsProduct pmsProduct = pmsProductMap.get(smsHomeRecommendProduct.getProductId());
                 SmsHomeRecommendProductDto smsHomeRecommendProductDto = new SmsHomeRecommendProductDto();
@@ -114,6 +119,7 @@ public class SmsHomeRecommendProductServiceImpl implements SmsHomeRecommendProdu
                 if(ObjectUtil.isNotNull(pmsProduct)) {
                     BeanUtil.copyProperties(pmsProduct, smsHomeRecommendProductDto);
                 }
+                smsHomeRecommendProductDto.setIsShow(checked);
                 return smsHomeRecommendProductDto;
 
             }).collect(Collectors.toList());
