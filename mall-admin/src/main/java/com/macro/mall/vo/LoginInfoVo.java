@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 public class LoginInfoVo {
     private Integer status;
     private String token;
-    private Long uid;
+    private Long id;
     private String phone;
     private String openId;
 }

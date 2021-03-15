@@ -27,4 +27,6 @@ public interface UmsMemberService {
      * @return
      */
     UmsMember getCurrMember();
+
+    UmsMember getById(Long memberId);
 }

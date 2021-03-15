@@ -24,6 +24,7 @@ import com.macro.mall.service.PmsProductService;
 import java.math.BigDecimal;
 import java.util.Map;
 
+import com.macro.mall.service.UmsMemberService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,6 +89,9 @@ public class PmsProductServiceImpl implements PmsProductService {
     private SmsCouponHistoryMapper smsCouponHistoryMapper;
     @Autowired
     private OrderCombineManager orderCombineManager;
+    @Autowired
+    private UmsMemberService memberService;
+
     @Override
     public int create(PmsProductParam productParam) {
         int count;

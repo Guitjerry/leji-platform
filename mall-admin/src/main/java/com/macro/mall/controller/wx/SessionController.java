@@ -86,7 +86,7 @@ public class SessionController {
             Assert.isTrue(false, "token获取失败");
         }
         LoginInfoVo loginInfoVo = LoginInfoVo.builder().status(umsMember.getStatus())
-                .phone(umsMember.getPhone()).openId(openId).token(token).uid(umsMember.getId()).build();
+                .phone(umsMember.getPhone()).openId(openId).token(token).id(umsMember.getId()).build();
         return CommonResult.success(loginInfoVo);
     }
 

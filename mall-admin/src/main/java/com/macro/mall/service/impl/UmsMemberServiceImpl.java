@@ -108,4 +108,9 @@ public class UmsMemberServiceImpl implements UmsMemberService {
         return getByOpenId(openId);
     }
 
+    @Override
+    public UmsMember getById(Long memberId) {
+        return memberMapper.selectByPrimaryKey(memberId);
+    }
+
 }
