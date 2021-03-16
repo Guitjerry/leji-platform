@@ -1,6 +1,7 @@
 package com.macro.mall.common.util;
 
 import cn.hutool.core.util.ObjectUtil;
+import com.macro.mall.common.constant.AuthConstant;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -10,16 +11,25 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+
+import java.text.ParseException;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Token工具类
  */
 public class TokenUtil {
+    @Autowired
+    private HttpServletRequest request;
     private static final Logger logger = LoggerFactory.getLogger(TokenUtil.class);
     public final static String PROXY_NAME = "proxyName";
     public final static String PROXY_ID = "proxyId";
