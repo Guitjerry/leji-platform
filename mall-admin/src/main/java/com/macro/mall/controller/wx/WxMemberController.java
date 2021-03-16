@@ -2,6 +2,7 @@ package com.macro.mall.controller.wx;
 
 import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.mapper.UmsMemberMapper;
+import com.macro.mall.model.UmsMember;
 import com.macro.mall.query.UmsMemberQuery;
 import com.macro.mall.service.UmsMemberService;
 import io.swagger.annotations.Api;
@@ -36,5 +37,13 @@ public class WxMemberController {
   @ResponseBody
   public CommonResult getMember(@PathVariable Long id) {
     return CommonResult.success(umsMemberService.getById(id));
+  }
+
+  @ApiOperation("更新会员")
+  @RequestMapping(value = "/update", method = RequestMethod.POST)
+  @ResponseBody
+  public CommonResult updateMember(@RequestBody UmsMember umsMember) {
+    umsMemberService.update(umsMember);
+    return CommonResult.success("ok");
   }
 }
