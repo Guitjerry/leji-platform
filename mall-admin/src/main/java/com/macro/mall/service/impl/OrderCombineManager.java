@@ -140,28 +140,32 @@ public class OrderCombineManager {
         if (ObjectUtil.isNotNull(reductionMap)) {
           //满减
           List<PmsProductFullReduction> reductions = reductionMap.get(omsWxAppCart.getId());
-          reductions = reductions.stream()
-            .filter(pmsProductFullReduction -> pmsProductFullReduction.getFullPrice().compareTo(goodAllPrice) <= 0)
-            .sorted((o1, o2) -> o2.getFullPrice().compareTo(o1.getFullPrice())).collect(Collectors.toList());
-          if (CollectionUtil.isNotEmpty(reductions)) {
-            productDiscountDto.setFullReduction(reductions);
-            PmsProductFullReduction fullReduction = reductions.get(0);
-            allDiscountMoney = BigDecimal.valueOf(allDiscountMoney).add(fullReduction.getReducePrice()).doubleValue();
-            promotionAmount = BigDecimal.valueOf(promotionAmount).add(fullReduction.getReducePrice()).doubleValue();
-            String discountNote =
-              omsWxAppCart.getName() + "【金额满" + fullReduction.getFullPrice() + "元减" + fullReduction.getReducePrice()
-                + "】";
-            productDiscountDto.setDiscountNote(discountNote);
+          if(CollectionUtil.isNotEmpty(reductions)) {
+            reductions = reductions.stream()
+                    .filter(pmsProductFullReduction -> pmsProductFullReduction.getFullPrice().compareTo(goodAllPrice) <= 0)
+                    .sorted((o1, o2) -> o2.getFullPrice().compareTo(o1.getFullPrice())).collect(Collectors.toList());
+            if (CollectionUtil.isNotEmpty(reductions)) {
+              productDiscountDto.setFullReduction(reductions);
+              PmsProductFullReduction fullReduction = reductions.get(0);
+              allDiscountMoney = BigDecimal.valueOf(allDiscountMoney).add(fullReduction.getReducePrice()).doubleValue();
+              promotionAmount = BigDecimal.valueOf(promotionAmount).add(fullReduction.getReducePrice()).doubleValue();
+              String discountNote =
+                      omsWxAppCart.getName() + "【金额满" + fullReduction.getFullPrice() + "元减" + fullReduction.getReducePrice()
+                              + "】";
+              productDiscountDto.setDiscountNote(discountNote);
+            }
           }
+
         }
 
         //阶梯折扣
         if (ObjectUtil.isNotNull(ladderMap)) {
           List<PmsProductLadder> pmsProductLadders = ladderMap.get(omsWxAppCart.getId());
-          pmsProductLadders = pmsProductLadders.stream()
-            .filter(pmsProductLadder -> omsWxAppCart.getCount() >= pmsProductLadder.getCount())
-            .sorted((o1, o2) -> o1.getDiscount().compareTo(o2.getDiscount())).collect(Collectors.toList());
+
           if (CollectionUtil.isNotEmpty(pmsProductLadders)) {
+            pmsProductLadders = pmsProductLadders.stream()
+                    .filter(pmsProductLadder -> omsWxAppCart.getCount() >= pmsProductLadder.getCount())
+                    .sorted((o1, o2) -> o1.getDiscount().compareTo(o2.getDiscount())).collect(Collectors.toList());
             productDiscountDto.setPmsProductLadder(pmsProductLadders);
             PmsProductLadder ladder = pmsProductLadders.get(0);
             //优惠金额
