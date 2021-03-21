@@ -117,7 +117,16 @@ public class OmsOrderServiceImpl implements OmsOrderService {
 
     @Override
     public OmsOrderDetail detail(Long id) {
-        return orderDao.getDetail(id);
+        OmsOrderDetail omsOrderDetail = orderDao.getDetail(id);
+        List<OmsOrderItem>  omsOrderItems = omsOrderDetail.getOrderItemList();
+        final Integer[] allCount = {0};
+        if(CollectionUtil.isNotEmpty(omsOrderItems)) {
+            omsOrderItems.forEach(omsOrderItem -> {
+                allCount[0] = allCount[0] + omsOrderItem.getProductQuantity();
+            });
+        }
+        omsOrderDetail.setAllCount(allCount[0]);
+        return omsOrderDetail;
     }
 
     @Override
