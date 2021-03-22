@@ -174,6 +174,11 @@ public class PmsProductCategoryServiceImpl implements PmsProductCategoryService 
         return productCategoryMapper.selectByExample(categoryExample);
     }
 
+    @Override
+    public List<PmsBrand> findBrandByCategoryId(Long categotyId) {
+        return productCategoryDao.findBrandByCategoryId(categotyId);
+    }
+
     /**
      * 根据分类的parentId设置分类的level
      */

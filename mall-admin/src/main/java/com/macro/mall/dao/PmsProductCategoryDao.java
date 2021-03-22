@@ -1,7 +1,9 @@
 package com.macro.mall.dao;
 
 import com.macro.mall.dto.PmsProductCategoryWithChildrenItem;
+import com.macro.mall.model.PmsBrand;
 import com.macro.mall.model.PmsProductCategory;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -18,4 +20,6 @@ public interface PmsProductCategoryDao {
     List<PmsProductCategory> listRoot();
 
     List<PmsProductCategory> listByParentId(Long id);
+
+    List<PmsBrand> findBrandByCategoryId(@Param(value = "categotyId") Long categotyId);
 }

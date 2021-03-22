@@ -4,6 +4,7 @@ import com.macro.mall.common.api.CommonPage;
 import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.dto.PmsProductCategoryParam;
 import com.macro.mall.dto.PmsProductCategoryWithChildrenItem;
+import com.macro.mall.model.PmsBrand;
 import com.macro.mall.model.PmsProduct;
 import com.macro.mall.model.PmsProductCategory;
 import com.macro.mall.service.PmsProductCategoryService;
@@ -43,4 +44,11 @@ public class WxPmsProductCategoryController {
         return CommonResult.success(list);
     }
 
+    @ApiOperation("查询分类下所有产品品牌")
+    @RequestMapping(value = "/findBrandByCategoryId/{categotyId}", method = RequestMethod.GET)
+    @ResponseBody
+    public CommonResult<List<PmsBrand>> findBrandByCategoryId(@PathVariable Long categotyId) {
+        List<PmsBrand> list = productCategoryService.findBrandByCategoryId(categotyId);
+        return CommonResult.success(list);
+    }
 }

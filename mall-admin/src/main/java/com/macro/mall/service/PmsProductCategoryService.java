@@ -2,6 +2,7 @@ package com.macro.mall.service;
 
 import com.macro.mall.dto.PmsProductCategoryParam;
 import com.macro.mall.dto.PmsProductCategoryWithChildrenItem;
+import com.macro.mall.model.PmsBrand;
 import com.macro.mall.model.PmsProductCategory;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -69,4 +70,10 @@ public interface PmsProductCategoryService {
      * @return
      */
     List<PmsProductCategory> listCategoryByParentId(Long parentId);
+
+    /**
+     * 查询分类下所有品牌
+     * @return
+     */
+    List<PmsBrand> findBrandByCategoryId(Long categotyId);
 }

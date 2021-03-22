@@ -16,6 +16,8 @@
             c2.icon child_icon
         from pms_product_category c1 left join pms_product_category c2 on c1.id = c2.parent_id
         where c1.parent_id = 0
+          and c1.nav_status = 1
+          and c1.show_status = 1
     </select>
 
     <select id="listRoot" resultType="com.macro.mall.model.PmsProductCategory">
@@ -25,6 +27,8 @@
             c1.parent_id as parentId
         from pms_product_category c1
         where c1.parent_id = 0
+        and c1.nav_status = 1
+        and c1.show_status = 1
     </select>
 
     <select id="listByParentId" resultMap="listWithChildrenMap">
@@ -34,4 +38,12 @@
         where c1.parent_id = #{id}
     </select>
 
+    <select id="findBrandByCategoryId" resultType="com.macro.mall.model.PmsBrand">
+        select
+            pd.id, pd.name, pd.logo, pd.recommend
+        from pms_product_category c1
+        inner join pms_product pp on pp.product_category_id = c1.id
+        inner join pms_brand pd on pp.brand_id = pd.id
+        where c1.id = #{categotyId}
+    </select>
 </mapper>
