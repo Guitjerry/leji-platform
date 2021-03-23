@@ -39,7 +39,7 @@
     </select>
 
     <select id="findBrandByCategoryId" resultType="com.macro.mall.model.PmsBrand">
-        select
+        select distinct
             pd.id, pd.name, pd.logo, pd.recommend
         from pms_product_category c1
         inner join pms_product pp on pp.product_category_id = c1.id
