@@ -112,7 +112,7 @@
     verify_status, sort, sale, price, promotion_price, gift_growth, gift_point, use_point_limit,
     sub_title, original_price, stock, low_stock, unit, weight, preview_status, service_ids,
     keywords, note, album_pics, detail_title, promotion_start_time, promotion_end_time,
-    promotion_per_limit, promotion_type, brand_name, product_category_name, is_show
+    promotion_per_limit, promotion_type, brand_name, product_category_name, is_show, description
   </sql>
   <sql id="Blob_Column_List">
     description, detail_desc, detail_html, detail_mobile_html
