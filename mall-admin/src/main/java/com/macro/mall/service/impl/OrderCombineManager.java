@@ -140,9 +140,9 @@ public class OrderCombineManager {
         if (ObjectUtil.isNotNull(reductionMap)) {
           //满减
           List<PmsProductFullReduction> reductions = reductionMap.get(omsWxAppCart.getId());
-          reductions =  reductions.stream()
-                  .filter(pmsProductFullReduction -> pmsProductFullReduction.getFullPrice().compareTo(BigDecimal.ZERO) > 0).collect(Collectors.toList());
           if(CollectionUtil.isNotEmpty(reductions)) {
+            reductions =  reductions.stream()
+                    .filter(pmsProductFullReduction -> pmsProductFullReduction.getFullPrice().compareTo(BigDecimal.ZERO) > 0).collect(Collectors.toList());
             reductions = reductions.stream()
                     .filter(pmsProductFullReduction -> pmsProductFullReduction.getFullPrice().compareTo(goodAllPrice) <= 0)
                     .sorted((o1, o2) -> o2.getFullPrice().compareTo(o1.getFullPrice())).collect(Collectors.toList());
@@ -163,24 +163,28 @@ public class OrderCombineManager {
         //阶梯折扣
         if (ObjectUtil.isNotNull(ladderMap)) {
           List<PmsProductLadder> pmsProductLadders = ladderMap.get(omsWxAppCart.getId());
-          pmsProductLadders =  pmsProductLadders.stream()
-                  .filter(pmsProductLadder -> pmsProductLadder.getPrice().compareTo(BigDecimal.ZERO) > 0).collect(Collectors.toList());
+
           if (CollectionUtil.isNotEmpty(pmsProductLadders)) {
+            pmsProductLadders =  pmsProductLadders.stream()
+                    .filter(pmsProductLadder -> pmsProductLadder.getPrice().compareTo(BigDecimal.ZERO) > 0).collect(Collectors.toList());
             pmsProductLadders = pmsProductLadders.stream()
                     .filter(pmsProductLadder -> omsWxAppCart.getCount() >= pmsProductLadder.getCount())
                     .sorted((o1, o2) -> o1.getDiscount().compareTo(o2.getDiscount())).collect(Collectors.toList());
             productDiscountDto.setPmsProductLadder(pmsProductLadders);
-            PmsProductLadder ladder = pmsProductLadders.get(0);
-            //优惠金额
-            BigDecimal saleDiscount = BigDecimal.valueOf(100.00 - ladder.getDiscount().doubleValue());
-            BigDecimal saleZhe = saleDiscount.divide(new BigDecimal("100.00"));
-            BigDecimal discountMoney = goodAllPrice.multiply(saleZhe);
-            allDiscountMoney = BigDecimal.valueOf(allDiscountMoney).add(discountMoney).doubleValue();
-            promotionAmount = BigDecimal.valueOf(promotionAmount).add(discountMoney).doubleValue();
-            ladder.setDiscountDesc(String.valueOf(discountMoney.setScale(0, BigDecimal.ROUND_HALF_UP)));
-            String discountNote =
-              omsWxAppCart.getName() + "【数量满" + ladder.getCount() + "立享" + ladder.getDiscount() + "折】";
-            productDiscountDto.setDiscountNote(discountNote);
+            if(CollUtil.isNotEmpty(pmsProductLadders)) {
+              PmsProductLadder ladder = pmsProductLadders.get(0);
+              //优惠金额
+              BigDecimal saleDiscount = BigDecimal.valueOf(100.00 - ladder.getDiscount().doubleValue());
+              BigDecimal saleZhe = saleDiscount.divide(new BigDecimal("100.00"));
+              BigDecimal discountMoney = goodAllPrice.multiply(saleZhe);
+              allDiscountMoney = BigDecimal.valueOf(allDiscountMoney).add(discountMoney).doubleValue();
+              promotionAmount = BigDecimal.valueOf(promotionAmount).add(discountMoney).doubleValue();
+              ladder.setDiscountDesc(String.valueOf(discountMoney.setScale(0, BigDecimal.ROUND_HALF_UP)));
+              String discountNote =
+                      omsWxAppCart.getName() + "【数量满" + ladder.getCount() + "立享" + ladder.getDiscount() + "折】";
+              productDiscountDto.setDiscountNote(discountNote);
+            }
+
           }
 
         }
