@@ -1,11 +1,6 @@
 package com.macro.mall.service;
 
-import com.macro.mall.dto.AllCartDiscountDto;
-import com.macro.mall.dto.OmsWxAppCart;
-import com.macro.mall.dto.PmsProductParam;
-import com.macro.mall.dto.PmsProductQueryParam;
-import com.macro.mall.dto.PmsProductResult;
-import com.macro.mall.dto.ProductDiscountDto;
+import com.macro.mall.dto.*;
 import com.macro.mall.model.PmsProduct;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -38,7 +33,7 @@ public interface PmsProductService {
     /**
      * 分页查询商品
      */
-    List<PmsProduct> list(PmsProductQueryParam productQueryParam, Integer pageSize, Integer pageNum);
+    List<PmsProductDto> list(PmsProductQueryParam productQueryParam, Integer pageSize, Integer pageNum);
 
     /**
      * 批量修改审核状态
@@ -88,4 +83,6 @@ public interface PmsProductService {
      * @return
      */
     List<PmsProduct> chooseUnNewGood(PmsProductQueryParam productQueryParam, Integer pageSize, Integer pageNum);
+
+    List<PmsProduct> listBackGround(PmsProductQueryParam productQueryParam, Integer pageSize, Integer pageNum);
 }

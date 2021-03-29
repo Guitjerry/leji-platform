@@ -140,6 +140,8 @@ public class OrderCombineManager {
         if (ObjectUtil.isNotNull(reductionMap)) {
           //满减
           List<PmsProductFullReduction> reductions = reductionMap.get(omsWxAppCart.getId());
+          reductions =  reductions.stream()
+                  .filter(pmsProductFullReduction -> pmsProductFullReduction.getFullPrice().compareTo(BigDecimal.ZERO) > 0).collect(Collectors.toList());
           if(CollectionUtil.isNotEmpty(reductions)) {
             reductions = reductions.stream()
                     .filter(pmsProductFullReduction -> pmsProductFullReduction.getFullPrice().compareTo(goodAllPrice) <= 0)
@@ -161,7 +163,8 @@ public class OrderCombineManager {
         //阶梯折扣
         if (ObjectUtil.isNotNull(ladderMap)) {
           List<PmsProductLadder> pmsProductLadders = ladderMap.get(omsWxAppCart.getId());
-
+          pmsProductLadders =  pmsProductLadders.stream()
+                  .filter(pmsProductLadder -> pmsProductLadder.getPrice().compareTo(BigDecimal.ZERO) > 0).collect(Collectors.toList());
           if (CollectionUtil.isNotEmpty(pmsProductLadders)) {
             pmsProductLadders = pmsProductLadders.stream()
                     .filter(pmsProductLadder -> omsWxAppCart.getCount() >= pmsProductLadder.getCount())

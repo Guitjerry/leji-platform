@@ -5,12 +5,7 @@ import com.google.common.collect.Lists;
 import com.macro.mall.common.api.CommonPage;
 import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.common.util.BeanCopyUtil;
-import com.macro.mall.dto.AllCartDiscountDto;
-import com.macro.mall.dto.OmsOrderPayParam;
-import com.macro.mall.dto.PmsProductParam;
-import com.macro.mall.dto.PmsProductQueryParam;
-import com.macro.mall.dto.PmsProductResult;
-import com.macro.mall.dto.ProductDiscountDto;
+import com.macro.mall.dto.*;
 import com.macro.mall.model.PmsProduct;
 import com.macro.mall.model.PmsProductCategory;
 import com.macro.mall.service.PmsProductService;
@@ -43,7 +38,7 @@ public class WxPmsProductController {
     if (ObjectUtil.isNotNull(productQueryParam.getType())) {
       productList = productService.listByType(productQueryParam, pageSize, pageNum);
     }else {
-      List<PmsProduct> pmsProducts = productService.list(productQueryParam, pageSize, pageNum);
+      List<PmsProduct> pmsProducts = productService.listBackGround(productQueryParam, pageSize, pageNum);
       productList = BeanCopyUtil.transform(pmsProducts, PmsProductParam.class);
     }
     return CommonResult.success(CommonPage.restPage(productList));
@@ -52,10 +47,10 @@ public class WxPmsProductController {
   @ApiOperation("查询分类商品")
   @RequestMapping(value = "/listByCategoryId", method = RequestMethod.GET)
   @ResponseBody
-  public CommonResult<CommonPage<PmsProduct>> listByCategoryId(PmsProductQueryParam productQueryParam,
-    @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
+  public CommonResult<CommonPage<PmsProductDto>> listByCategoryId(PmsProductQueryParam productQueryParam,
+    @RequestParam(value = "pageSize", defaultValue = "100") Integer pageSize,
     @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
-    List<PmsProduct> productList = Lists.newArrayList();
+    List<PmsProductDto> productList = Lists.newArrayList();
     productList = productService.list(productQueryParam, pageSize, pageNum);
     return CommonResult.success(CommonPage.restPage(productList));
   }

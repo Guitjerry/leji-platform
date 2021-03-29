@@ -6,15 +6,10 @@ import cn.hutool.core.util.ObjectUtil;
 import com.github.pagehelper.PageHelper;
 import com.google.common.collect.Lists;
 import com.macro.mall.common.enums.CouponTypeEnum;
+import com.macro.mall.common.util.BeanCopyUtil;
 import com.macro.mall.constant.CommonConstant;
 import com.macro.mall.dao.*;
-import com.macro.mall.dto.AllCartDiscountDto;
-import com.macro.mall.dto.CartDiscountQuery;
-import com.macro.mall.dto.OmsWxAppCart;
-import com.macro.mall.dto.PmsProductParam;
-import com.macro.mall.dto.PmsProductQueryParam;
-import com.macro.mall.dto.PmsProductResult;
-import com.macro.mall.dto.ProductDiscountDto;
+import com.macro.mall.dto.*;
 import com.macro.mall.enums.ListTypeEnum;
 import com.macro.mall.enums.SortStatusTypeEnum;
 import com.macro.mall.mapper.*;
@@ -91,7 +86,8 @@ public class PmsProductServiceImpl implements PmsProductService {
     private OrderCombineManager orderCombineManager;
     @Autowired
     private UmsMemberService memberService;
-
+    @Autowired
+    private PmsProductFullReductionMapper pmsProductFullReductionMapper;
     @Override
     public int create(PmsProductParam productParam) {
         int count;
@@ -243,7 +239,60 @@ public class PmsProductServiceImpl implements PmsProductService {
     }
 
     @Override
-    public List<PmsProduct> list(PmsProductQueryParam productQueryParam, Integer pageSize, Integer pageNum) {
+    public List<PmsProductDto> list(PmsProductQueryParam productQueryParam, Integer pageSize, Integer pageNum) {
+        List<PmsProduct> pmsProducts = this.listBackGround(productQueryParam, pageSize, pageNum);
+        List<PmsProductDto> pmsProductDtos = BeanCopyUtil.transform(pmsProducts, PmsProductDto.class);
+        //计算可领取优惠券
+        pmsProductDtos.forEach(pmsProductDto -> {
+            SmsCouponProductRelationExample relationExample = new SmsCouponProductRelationExample();
+            relationExample.or().andProductIdEqualTo(pmsProductDto.getId());
+            List<SmsCouponProductRelation> productRelations = smsCouponProductRelationMapper.selectByExample(relationExample);
+            if(CollUtil.isNotEmpty(productRelations)) {
+                List<Long> couponIds = productRelations.stream().map(SmsCouponProductRelation::getCouponId).collect(Collectors.toList());
+                SmsCouponExample smsCouponExample = new SmsCouponExample();
+                smsCouponExample.or().andIdIn(couponIds);
+                List<SmsCoupon> smsCoupons = smsCouponMapper.selectByExample(smsCouponExample);
+                pmsProductDto.setSmsCouponList(smsCoupons);
+            }
+
+            PmsProductFullReductionExample example = new PmsProductFullReductionExample();
+            example.or().andProductIdEqualTo(pmsProductDto.getId()).andFullPriceGreaterThan(BigDecimal.ZERO);
+            List<PmsProductFullReduction> reductions = pmsProductFullReductionMapper.selectByExample(example);
+            if(CollUtil.isNotEmpty(reductions)) {
+                pmsProductDto.setFullReductions(reductions);
+            }
+        });
+        //计算满减返
+
+        //计算折扣
+        return pmsProductDtos;
+    }
+
+    @Override
+    public List<PmsProductParam> listByType(PmsProductQueryParam pmsProductQueryParam, Integer pageSize, Integer pageNum) {
+        PageHelper.startPage(pageNum, pageSize);
+        List<PmsProductParam> pmsProducts = Lists.newArrayList();
+        if (pmsProductQueryParam.getType().equals(ListTypeEnum.NEW.getKey())) {
+            pmsProducts = productDao.listByNewProduct(CommonConstant.FLAG_YES, pmsProductQueryParam.getSortType());
+        } else if (pmsProductQueryParam.getType().equals(ListTypeEnum.TEJIA.getKey())) {
+            pmsProducts = productDao.listByTejia(CommonConstant.FLAG_YES, pmsProductQueryParam.getSortType());
+        }
+        return pmsProducts;
+    }
+
+    @Override
+    public AllCartDiscountDto queryDiscount(List<OmsWxAppCart> carts, Long memberId) {
+        return orderCombineManager.queryDiscount(carts,memberId);
+    }
+
+    @Override
+    public List<PmsProduct> chooseUnNewGood(PmsProductQueryParam productQueryParam, Integer pageSize, Integer pageNum) {
+        PageHelper.startPage(pageNum, pageSize);
+        return productDao.chooseUnNewGood(productQueryParam);
+    }
+
+    @Override
+    public List<PmsProduct> listBackGround(PmsProductQueryParam productQueryParam, Integer pageSize, Integer pageNum) {
         PageHelper.startPage(pageNum, pageSize);
         PmsProductExample productExample = new PmsProductExample();
         PmsProductExample.Criteria criteria = productExample.createCriteria();
@@ -283,31 +332,8 @@ public class PmsProductServiceImpl implements PmsProductService {
                 productExample.setOrderByClause("price asc");
             }
         }
-
-        return productMapper.selectByExample(productExample);
-    }
-
-    @Override
-    public List<PmsProductParam> listByType(PmsProductQueryParam pmsProductQueryParam, Integer pageSize, Integer pageNum) {
-        PageHelper.startPage(pageNum, pageSize);
-        List<PmsProductParam> pmsProducts = Lists.newArrayList();
-        if (pmsProductQueryParam.getType().equals(ListTypeEnum.NEW.getKey())) {
-            pmsProducts = productDao.listByNewProduct(CommonConstant.FLAG_YES, pmsProductQueryParam.getSortType());
-        } else if (pmsProductQueryParam.getType().equals(ListTypeEnum.TEJIA.getKey())) {
-            pmsProducts = productDao.listByTejia(CommonConstant.FLAG_YES, pmsProductQueryParam.getSortType());
-        }
+        List<PmsProduct> pmsProducts = productMapper.selectByExample(productExample);
         return pmsProducts;
-    }
-
-    @Override
-    public AllCartDiscountDto queryDiscount(List<OmsWxAppCart> carts, Long memberId) {
-        return orderCombineManager.queryDiscount(carts,memberId);
-    }
-
-    @Override
-    public List<PmsProduct> chooseUnNewGood(PmsProductQueryParam productQueryParam, Integer pageSize, Integer pageNum) {
-        PageHelper.startPage(pageNum, pageSize);
-        return productDao.chooseUnNewGood(productQueryParam);
     }
 
     @Override

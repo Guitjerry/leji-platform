@@ -1,10 +1,13 @@
 package com.macro.mall.dto;
 
+import cn.hutool.core.collection.CollUtil;
+import com.google.common.collect.Lists;
 import com.macro.mall.model.*;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -28,6 +31,28 @@ public class PmsProductParam extends PmsProduct{
     private List<CmsSubjectProductRelation> subjectProductRelationList;
     @ApiModelProperty("优选专区和商品的关系")
     private List<CmsPrefrenceAreaProductRelation> prefrenceAreaProductRelationList;
-  @ApiModelProperty("商品专属优惠券")
+   @ApiModelProperty("商品专属优惠券")
     private List<SmsCoupon> couponList;
+
+    public List<PmsProductFullReduction> getProductFullReductionList() {
+        if(CollUtil.isEmpty(productFullReductionList)) {
+            PmsProductFullReduction pmsProductFullReduction = new PmsProductFullReduction();
+            pmsProductFullReduction.setProductId(getId());
+            pmsProductFullReduction.setFullPrice(BigDecimal.ZERO);
+            pmsProductFullReduction.setReducePrice(BigDecimal.ZERO);
+            productFullReductionList = Lists.newArrayList(pmsProductFullReduction);
+        }
+        return productFullReductionList;
+    }
+
+    public List<PmsProductLadder> getProductLadderList() {
+        if(CollUtil.isEmpty(productLadderList)) {
+            PmsProductLadder pmsProductLadder = new PmsProductLadder();
+            pmsProductLadder.setProductId(getId());
+            pmsProductLadder.setPrice(BigDecimal.ZERO);
+            pmsProductLadder.setDiscount(BigDecimal.ZERO);
+            productLadderList = Lists.newArrayList(pmsProductLadder);
+        }
+        return productLadderList;
+    }
 }
