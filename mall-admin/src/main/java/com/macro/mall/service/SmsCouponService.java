@@ -1,7 +1,9 @@
 package com.macro.mall.service;
 
+import com.macro.mall.dto.SmsCouponDto;
 import com.macro.mall.dto.SmsCouponParam;
 import com.macro.mall.model.SmsCoupon;
+import com.macro.mall.resp.SmsCouponResp;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -39,4 +41,13 @@ public interface SmsCouponService {
      * @param id 优惠券表id
      */
     SmsCouponParam getItem(Long id);
+
+    /**
+     * 微信查询优惠券
+     * @param pageNum
+     * @param pageSize
+     * @param token
+     * @return
+     */
+    SmsCouponResp listWxCoupon(Integer pageNum, Integer pageSize, String token);
 }

@@ -112,6 +112,12 @@ public class TokenUtil {
         }
     }
 
+    public static Integer getIdByToken(String token) throws Exception {
+        SignedJWT jwt = SignedJWT.parse(token);
+        Object id = jwt.getJWTClaimsSet().getClaim("id");
+        return ObjectUtil.isNull(id)? null: Integer.valueOf(id.toString());
+    }
+
     public static void main(String[] args) throws Exception {
         validateToken("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkb2kiLCJvcGVuSWQiOiJvUm52cjRsc1pLUmMyUmJuS3lyVnpGMTBCRmVZIiwiaXNzIjoiaHR0cDpcL1wvd3d3LmRvaWR1b3lpLmNvbSIsImlkIjo4LCJleHAiOjE2MDc4NjA2MDF9.LlEkKk-m3m9rYbxSV2rrPJpgSE6iISOwIUMV6nLTRBI");
     }

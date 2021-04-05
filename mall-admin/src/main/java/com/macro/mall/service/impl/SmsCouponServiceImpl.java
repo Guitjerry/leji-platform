@@ -1,20 +1,26 @@
 package com.macro.mall.service.impl;
 
+import cn.hutool.core.date.DateUtil;
 import com.github.pagehelper.PageHelper;
 import com.macro.mall.dao.SmsCouponDao;
 import com.macro.mall.dao.SmsCouponProductCategoryRelationDao;
 import com.macro.mall.dao.SmsCouponProductRelationDao;
+import com.macro.mall.dto.SmsCouponDto;
 import com.macro.mall.dto.SmsCouponParam;
 import com.macro.mall.mapper.SmsCouponMapper;
 import com.macro.mall.mapper.SmsCouponProductCategoryRelationMapper;
 import com.macro.mall.mapper.SmsCouponProductRelationMapper;
 import com.macro.mall.model.*;
+import com.macro.mall.resp.SmsCouponResp;
 import com.macro.mall.service.SmsCouponService;
+import com.macro.mall.util.TokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 优惠券管理Service实现类
@@ -121,5 +127,33 @@ public class SmsCouponServiceImpl implements SmsCouponService {
     @Override
     public SmsCouponParam getItem(Long id) {
         return couponDao.getItem(id);
+    }
+
+    /**
+     * 微信查询优惠券
+     * @param pageNum
+     * @param pageSize
+     * @param token
+     * @return
+     */
+    @Override
+    public SmsCouponResp listWxCoupon(Integer pageNum, Integer pageSize, String token) {
+        SmsCouponResp smsCouponResp = new SmsCouponResp();
+       try {
+           Integer id = TokenUtil.getIdByToken(token);
+           //查询所有的可领取优惠券
+           List<SmsCouponDto> smsCouponDtos =  productRelationDao.listAvailableCoupons(id);
+           smsCouponDtos = smsCouponDtos.stream()
+                   .filter(smsCouponDto -> smsCouponDto.getPublishCount() > smsCouponDto.getReceiveCount()
+                           && smsCouponDto.getEndTime().getTime() > new Date().getTime()).collect(Collectors.toList());
+           //未使用
+
+           //已使用
+
+           smsCouponResp.setAvailableCoupons(smsCouponDtos);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return smsCouponResp;
     }
 }
