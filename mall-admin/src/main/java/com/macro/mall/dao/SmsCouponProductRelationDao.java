@@ -18,5 +18,5 @@ public interface SmsCouponProductRelationDao {
      */
     int insertList(@Param("list")List<SmsCouponProductRelation> productRelationList);
 
-    List<SmsCouponDto> listAvailableCoupons(Integer id);
+    List<SmsCouponDto> listAvailableCoupons(Long id);
 }

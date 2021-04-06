@@ -1,12 +1,19 @@
 package com.macro.mall.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.github.pagehelper.PageHelper;
+import com.macro.mall.common.exception.ApiException;
+import com.macro.mall.common.util.BeanCopyUtil;
+import com.macro.mall.constant.CommonConstant;
 import com.macro.mall.dao.SmsCouponDao;
 import com.macro.mall.dao.SmsCouponProductCategoryRelationDao;
 import com.macro.mall.dao.SmsCouponProductRelationDao;
 import com.macro.mall.dto.SmsCouponDto;
 import com.macro.mall.dto.SmsCouponParam;
+import com.macro.mall.enums.CouponStatusEnum;
+import com.macro.mall.mapper.SmsCouponHistoryMapper;
 import com.macro.mall.mapper.SmsCouponMapper;
 import com.macro.mall.mapper.SmsCouponProductCategoryRelationMapper;
 import com.macro.mall.mapper.SmsCouponProductRelationMapper;
@@ -16,6 +23,7 @@ import com.macro.mall.service.SmsCouponService;
 import com.macro.mall.util.TokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import java.util.Date;
@@ -40,6 +48,10 @@ public class SmsCouponServiceImpl implements SmsCouponService {
     private SmsCouponProductCategoryRelationDao productCategoryRelationDao;
     @Autowired
     private SmsCouponDao couponDao;
+    @Autowired
+    private SmsCouponHistoryMapper smsCouponHistoryMapper;
+    @Autowired
+    private SmsCouponMapper smsCouponMapper;
     @Override
     public int create(SmsCouponParam couponParam) {
         couponParam.setCount(couponParam.getPublishCount());
@@ -140,20 +152,136 @@ public class SmsCouponServiceImpl implements SmsCouponService {
     public SmsCouponResp listWxCoupon(Integer pageNum, Integer pageSize, String token) {
         SmsCouponResp smsCouponResp = new SmsCouponResp();
        try {
-           Integer id = TokenUtil.getIdByToken(token);
+           Long id = TokenUtil.getIdByToken(token);
            //查询所有的可领取优惠券
            List<SmsCouponDto> smsCouponDtos =  productRelationDao.listAvailableCoupons(id);
            smsCouponDtos = smsCouponDtos.stream()
                    .filter(smsCouponDto -> smsCouponDto.getPublishCount() > smsCouponDto.getReceiveCount()
                            && smsCouponDto.getEndTime().getTime() > new Date().getTime()).collect(Collectors.toList());
-           //未使用
-
-           //已使用
-
-           smsCouponResp.setAvailableCoupons(smsCouponDtos);
+           if(CollectionUtil.isNotEmpty(smsCouponDtos)) {
+               smsCouponResp.setAvailableCoupons(smsCouponDtos);
+           }
         } catch (Exception e) {
             e.printStackTrace();
+            throw new ApiException(e.getMessage());
         }
         return smsCouponResp;
+    }
+
+    /**
+     * 领取优惠券
+     * 1.校验资格
+     * 2.领取记录到history
+     * 3.更新优惠券数量
+     * @param memberId
+     * @return
+     */
+    @Override
+    public SmsCoupon receiveCoupon(Long memberId, Long couponId) throws Exception{
+        //校验领取资格
+        vaildreceiveCoupon(memberId, couponId);
+        //记录领取信息
+        SmsCoupon smsCoupon =  couponMapper.selectByPrimaryKey(couponId);
+        SmsCouponHistory smsCouponHistory = new SmsCouponHistory();
+        smsCouponHistory.setCouponId(couponId);
+        smsCouponHistory.setCouponCode(smsCoupon.getCode());
+        smsCouponHistory.setCreateTime(DateUtil.parseDate(DateUtil.now()));
+        smsCouponHistory.setMemberId(memberId);
+        smsCouponHistory.setUseStatus(CommonConstant.FLAG_NO);
+        smsCouponHistory.setGetType(CommonConstant.FLAG_YES);
+        smsCouponHistoryMapper.insertSelective(smsCouponHistory);
+        return smsCoupon;
+    }
+
+    /**
+     * 我的优惠券
+     * @param memberId
+     * @return
+     */
+    @Override
+    public SmsCouponResp myCoupon(Long memberId) {
+        SmsCouponResp smsCouponResp = null;
+        SmsCouponHistoryExample historyExample = new SmsCouponHistoryExample();
+        historyExample.or().andMemberIdEqualTo(memberId);
+        List<SmsCouponHistory>  smsCouponHistories =  smsCouponHistoryMapper.selectByExample(historyExample);
+
+        if(CollectionUtil.isNotEmpty(smsCouponHistories)) {
+            smsCouponResp = new SmsCouponResp();
+            //未使用
+            List<SmsCouponHistory> unUseCoupon = smsCouponHistories.stream()
+                    .filter(smsCouponHistory -> smsCouponHistory.getUseStatus().equals(CouponStatusEnum.UNUSE.getKey())).collect(Collectors.toList());
+            if(CollectionUtil.isNotEmpty(unUseCoupon)) {
+                List<Long> unUseCouponIds = unUseCoupon.stream().map(SmsCouponHistory::getCouponId).collect(Collectors.toList());
+                SmsCouponExample couponExample = new SmsCouponExample();
+                couponExample.or().andIdIn(unUseCouponIds);
+                List<SmsCoupon> smsCoupons = smsCouponMapper.selectByExample(couponExample);
+                if(CollectionUtil.isNotEmpty(smsCoupons)) {
+                   List<SmsCouponDto> smsCouponDtos =  smsCoupons.stream().map(smsCoupon -> {
+                        SmsCouponDto smsCouponDto = BeanCopyUtil.transform(smsCoupon, SmsCouponDto.class);
+                        //3天内为即将到期
+                        if(smsCouponDto.getEndTime().getTime() - new Date().getTime()<= 1000*60*60*24*3) {
+                            smsCouponDto.setNearExpire(CommonConstant.FLAG_YES);
+                        }
+                        return smsCouponDto;
+                    }).collect(Collectors.toList());
+                    smsCouponResp.setUnUseCoupons(smsCouponDtos);
+                }
+            }
+
+            //已使用
+            List<SmsCouponHistory> usedCoupon = smsCouponHistories.stream()
+                    .filter(smsCouponHistory -> smsCouponHistory.getUseStatus().equals(CouponStatusEnum.USED.getKey())).collect(Collectors.toList());
+            if(CollectionUtil.isNotEmpty(usedCoupon)) {
+                List<Long> unUseCouponIds = usedCoupon.stream().map(SmsCouponHistory::getCouponId).collect(Collectors.toList());
+                SmsCouponExample couponExample = new SmsCouponExample();
+                couponExample.or().andIdIn(unUseCouponIds);
+                List<SmsCoupon> smsCoupons = smsCouponMapper.selectByExample(couponExample);
+                if(CollectionUtil.isNotEmpty(smsCoupons)) {
+                    List<SmsCouponDto> smsCouponDtos = BeanCopyUtil.transform(smsCoupons, SmsCouponDto.class);
+                    smsCouponResp.setUsedCoupons(smsCouponDtos);
+                }
+            }
+
+            //已过期
+            List<Long> couponIds = smsCouponHistories.stream()
+                    .map(SmsCouponHistory::getCouponId).collect(Collectors.toList());
+            SmsCouponExample couponExample = new SmsCouponExample();
+            couponExample.or().andIdIn(couponIds);
+            List<SmsCoupon> smsCoupons = smsCouponMapper.selectByExample(couponExample);
+            smsCoupons = smsCoupons.stream().filter(smsCoupon -> smsCoupon.getEndTime().after(new Date())).collect(Collectors.toList());
+            if(CollectionUtil.isNotEmpty(smsCoupons)) {
+                List<SmsCouponDto> smsCouponDtos = BeanCopyUtil.transform(smsCoupons, SmsCouponDto.class);
+                smsCouponResp.setExpireCoupons(smsCouponDtos);
+            }
+
+        }
+        return smsCouponResp;
+    }
+
+    /**
+     * 校验领取资格
+     * @param memberId
+     * @param couponId
+     */
+    private void vaildreceiveCoupon(Long memberId, Long couponId) throws Exception{
+       SmsCoupon smsCoupon =  couponMapper.selectByPrimaryKey(couponId);
+       //校验可用数量
+       Integer canUseCount = smsCoupon.getPublishCount() -  smsCoupon.getReceiveCount();
+       //校验到期
+       if(smsCoupon.getEndTime().getTime() < new Date().getTime()) {
+           throw new ApiException("优惠券已过期，无法领取");
+        }
+
+       if(canUseCount<=0) {
+           throw new ApiException("当前优惠券已经被抢完，请下次再试");
+       }
+       //查询领取
+        SmsCouponHistoryExample historyExample = new SmsCouponHistoryExample();
+        historyExample.or().andCouponIdEqualTo(couponId).andMemberIdEqualTo(memberId);
+        Long count = smsCouponHistoryMapper.countByExample(historyExample);
+        Integer perLimit = smsCoupon.getPerLimit();
+        if(perLimit < count) {
+            throw new ApiException("您已经领取该优惠券了，不无法重复领取");
+        }
     }
 }

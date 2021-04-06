@@ -12,6 +12,7 @@
     </insert>
     <select id="listAvailableCoupons" resultType="com.macro.mall.dto.SmsCouponDto">
         select pp.name,
+               sc.id,
                pp.brand_name as brandName,
                pp.product_category_name as productCategoryName,
                sc.name,

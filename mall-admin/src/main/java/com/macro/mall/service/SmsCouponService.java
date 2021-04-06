@@ -50,4 +50,18 @@ public interface SmsCouponService {
      * @return
      */
     SmsCouponResp listWxCoupon(Integer pageNum, Integer pageSize, String token);
+
+    /**
+     * 领取优惠券
+     * @param memberId
+     * @return
+     */
+    SmsCoupon receiveCoupon(Long memberId, Long couponId) throws Exception;
+
+    /**
+     * 我的优惠券
+     * @param memberId
+     * @return
+     */
+    SmsCouponResp myCoupon(Long memberId);
 }

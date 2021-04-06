@@ -112,10 +112,15 @@ public class TokenUtil {
         }
     }
 
-    public static Integer getIdByToken(String token) throws Exception {
+    public static Long getIdByToken(String token) throws Exception {
         SignedJWT jwt = SignedJWT.parse(token);
         Object id = jwt.getJWTClaimsSet().getClaim("id");
-        return ObjectUtil.isNull(id)? null: Integer.valueOf(id.toString());
+        return ObjectUtil.isNull(id)? null: Long.valueOf(id.toString());
+    }
+
+    public static Long getIdByAuthorization(String authorization) throws Exception {
+        String token = authorization.replace("Bearer", "");
+        return getIdByToken(token);
     }
 
     public static void main(String[] args) throws Exception {
