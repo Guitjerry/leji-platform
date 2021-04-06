@@ -248,7 +248,7 @@ public class SmsCouponServiceImpl implements SmsCouponService {
             SmsCouponExample couponExample = new SmsCouponExample();
             couponExample.or().andIdIn(couponIds);
             List<SmsCoupon> smsCoupons = smsCouponMapper.selectByExample(couponExample);
-            smsCoupons = smsCoupons.stream().filter(smsCoupon -> smsCoupon.getEndTime().after(new Date())).collect(Collectors.toList());
+            smsCoupons = smsCoupons.stream().filter(smsCoupon -> smsCoupon.getEndTime().before(new Date())).collect(Collectors.toList());
             if(CollectionUtil.isNotEmpty(smsCoupons)) {
                 List<SmsCouponDto> smsCouponDtos = BeanCopyUtil.transform(smsCoupons, SmsCouponDto.class);
                 smsCouponResp.setExpireCoupons(smsCouponDtos);
