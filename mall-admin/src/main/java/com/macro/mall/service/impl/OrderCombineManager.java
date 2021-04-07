@@ -10,6 +10,7 @@ import com.macro.mall.dto.AllCartDiscountDto;
 import com.macro.mall.dto.CartDiscountQuery;
 import com.macro.mall.dto.OmsWxAppCart;
 import com.macro.mall.dto.ProductDiscountDto;
+import com.macro.mall.enums.CouponDiscountEnum;
 import com.macro.mall.mapper.PmsProductFullReductionMapper;
 import com.macro.mall.mapper.PmsProductLadderMapper;
 import com.macro.mall.model.*;
@@ -66,15 +67,15 @@ public class OrderCombineManager {
     AllCartDiscountDto allCartDiscountDto = new AllCartDiscountDto();
     List<ProductDiscountDto> discountDtos = Lists.newArrayList();
 
-    Double allMoney = 0.0;//总价格
-    Double allDiscountMoney = 0.0;//总优惠金额
-    Double promotionAmount = 0.0;//促销优惠金额
-    Double couponMoney = 0.0;//优惠券金额
+    BigDecimal allMoney = BigDecimal.ZERO;//总价格
+    BigDecimal allDiscountMoney = BigDecimal.ZERO;//总优惠金额
+    BigDecimal promotionAmount = BigDecimal.ZERO;;//促销优惠金额
+    BigDecimal couponMoney = BigDecimal.ZERO;;//优惠券金额
     //计算优惠信息
     if (!CollUtil.isEmpty(carts)) {
       //某项商品总金额
       Double allPrice = carts.stream().mapToDouble(cart -> cart.getPrice() * cart.getCount()).sum();
-      allMoney = BigDecimal.valueOf(allPrice).add(BigDecimal.valueOf(allMoney)).doubleValue();
+      allMoney = BigDecimal.valueOf(allPrice).add(allMoney);
       Map<Long, List<OmsWxAppCart>> catrgoryCart =
         carts.stream().collect(Collectors.groupingBy(OmsWxAppCart::getProductCategoryId));
       Map<Long, OmsWxAppCart> goodCart =
@@ -124,8 +125,9 @@ public class OrderCombineManager {
         .collect(Collectors.toList());
       allCartDiscountDto.setCoupons(smsFilterCoupons);
       if (CollectionUtil.isNotEmpty(smsFilterCoupons)) {
-        allDiscountMoney = BigDecimal.valueOf(allDiscountMoney).add(smsFilterCoupons.get(0).getAmount()).doubleValue();
-        couponMoney = BigDecimal.valueOf(couponMoney).add(smsFilterCoupons.get(0).getAmount()).doubleValue();
+        allDiscountMoney = allDiscountMoney.add(smsFilterCoupons.get(0).getAmount());
+        allCartDiscountDto.setDiscountType(CouponDiscountEnum.COUPON.getKey());
+        couponMoney = couponMoney.add(smsFilterCoupons.get(0).getAmount());
         allCartDiscountDto.setCouponMoney(couponMoney);
         allCartDiscountDto.setCouponId(smsFilterCoupons.get(0).getId());
         allCartDiscountDto.setCouponName(smsFilterCoupons.get(0).getName());
@@ -149,8 +151,12 @@ public class OrderCombineManager {
             if (CollectionUtil.isNotEmpty(reductions)) {
               productDiscountDto.setFullReduction(reductions);
               PmsProductFullReduction fullReduction = reductions.get(0);
-              allDiscountMoney = BigDecimal.valueOf(allDiscountMoney).add(fullReduction.getReducePrice()).doubleValue();
-              promotionAmount = BigDecimal.valueOf(promotionAmount).add(fullReduction.getReducePrice()).doubleValue();
+
+              if (allDiscountMoney.compareTo(fullReduction.getReducePrice()) < 0) {
+                allDiscountMoney = fullReduction.getReducePrice();
+                allCartDiscountDto.setDiscountType(CouponDiscountEnum.MAN.getKey());
+              }
+              promotionAmount = promotionAmount.add(fullReduction.getReducePrice());
               String discountNote =
                       omsWxAppCart.getName() + "【金额满" + fullReduction.getFullPrice() + "元减" + fullReduction.getReducePrice()
                               + "】";
@@ -177,8 +183,10 @@ public class OrderCombineManager {
               BigDecimal saleDiscount = BigDecimal.valueOf(100.00 - ladder.getDiscount().doubleValue());
               BigDecimal saleZhe = saleDiscount.divide(new BigDecimal("100.00"));
               BigDecimal discountMoney = goodAllPrice.multiply(saleZhe);
-              allDiscountMoney = BigDecimal.valueOf(allDiscountMoney).add(discountMoney).doubleValue();
-              promotionAmount = BigDecimal.valueOf(promotionAmount).add(discountMoney).doubleValue();
+              if (allDiscountMoney.compareTo(discountMoney) < 0) {
+                allDiscountMoney = discountMoney;
+                allCartDiscountDto.setDiscountType(CouponDiscountEnum.ZHE.getKey());
+              }
               ladder.setDiscountDesc(String.valueOf(discountMoney.setScale(0, BigDecimal.ROUND_HALF_UP)));
               String discountNote =
                       omsWxAppCart.getName() + "【数量满" + ladder.getCount() + "立享" + ladder.getDiscount() + "折】";
@@ -193,12 +201,12 @@ public class OrderCombineManager {
       }
 
     }
-    Double lastDiscountMoney =
-      BigDecimal.valueOf(allMoney).subtract(BigDecimal.valueOf(allDiscountMoney)).doubleValue();
+    BigDecimal lastDiscountMoney = allMoney.subtract(allDiscountMoney);
     allCartDiscountDto.setDiscountDtos(discountDtos);
     allCartDiscountDto.setAllMoney(allMoney);
     allCartDiscountDto.setAllDiscountMoney(allDiscountMoney);
-    allCartDiscountDto.setPromotionAmount(promotionAmount);
+    allCartDiscountDto.setPayAmount(allMoney.subtract(allDiscountMoney));
+    allCartDiscountDto.setPromotionAmount(allDiscountMoney);
     allCartDiscountDto.setLastDiscountMoney(lastDiscountMoney);
     return allCartDiscountDto;
   }

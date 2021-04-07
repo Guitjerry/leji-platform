@@ -11,6 +11,7 @@ import com.macro.mall.constant.CommonConstant;
 import com.macro.mall.dao.OmsOrderDao;
 import com.macro.mall.dao.OmsOrderOperateHistoryDao;
 import com.macro.mall.dto.*;
+import com.macro.mall.enums.CouponStatusEnum;
 import com.macro.mall.enums.OrderPaySourceEnum;
 import com.macro.mall.enums.OrderStatusTypeEnum;
 import com.macro.mall.enums.PayTypeEnum;
@@ -60,7 +61,8 @@ public class OmsOrderServiceImpl implements OmsOrderService {
     private PrintCustomer printCustomer;
     @Autowired
     private PmsProductMapper pmsProductMapper;
-
+    @Autowired
+    private SmsCouponHistoryMapper smsCouponHistoryMapper;
     @Override
     public List<OmsOrder> list(OmsOrderQueryParam queryParam, Integer pageSize, Integer pageNum) {
         PageHelper.startPage(pageNum, pageSize);
@@ -210,7 +212,7 @@ public class OmsOrderServiceImpl implements OmsOrderService {
             Integer allCount = pmsProduct.getStock();//商品总库存
             Integer saleCount = pmsProduct.getSale();//销量
             pmsProduct.setSale(payCount + saleCount);
-            pmsProduct.setStock(allCount + payCount);
+            pmsProduct.setStock(allCount - payCount);
             pmsProductMapper.updateByPrimaryKeySelective(pmsProduct);
             Integer giftPoint = pmsProduct.getGiftPoint();
             if (ObjectUtil.isNotNull(giftPoint)) {
@@ -221,38 +223,65 @@ public class OmsOrderServiceImpl implements OmsOrderService {
             umsMember.setIntegration(integration);
             umsMemberMapper.updateByPrimaryKeySelective(umsMember);
         }
+
     }
 
-
-    @Override
-    @Transactional
-    public int createOrder(OmsOrderPayParam omsOrderPayParam) {
-        //
+    /**
+     * 1.验证地址
+     * 2.验证商品
+     * 3.验证商品是否上线
+     * 4.验证商品库存
+     * @param omsOrderPayParam
+     */
+    private void vaildOrderParam(OmsOrderPayParam omsOrderPayParam) {
         OmsCompanyAddress omsCompanyAddress = omsOrderPayParam.getAddresses();
         if (ObjectUtil.isNull(omsCompanyAddress)) {
             Asserts.fail("请选择地址！");
         }
+        if (CollectionUtil.isEmpty(omsOrderPayParam.getCarts())) {
+            Asserts.fail("请选择商品后下单！");
+        }
+        List<OmsWxAppCart> carts = omsOrderPayParam.getCarts();
+        if(CollectionUtil.isNotEmpty(carts)) {
+            carts.forEach(omsWxAppCart -> {
+                Long productId = omsWxAppCart.getId();
+                PmsProduct pmsProduct = pmsProductMapper.selectByPrimaryKey(productId);
+                if(pmsProduct.getStock()- omsWxAppCart.getCount()<0) {
+                    Asserts.fail("商品【" + pmsProduct.getName() + "】库存不足");
+                }
+                if(pmsProduct.getDeleteStatus().equals(CommonConstant.FLAG_YES)) {
+                    Asserts.fail("商品【" + pmsProduct.getName() + "】已删除");
+                }
+                if(pmsProduct.getPublishStatus().equals(CommonConstant.FLAG_NO)) {
+                    Asserts.fail("商品【" + pmsProduct.getName() + "】已下架");
+                }
+            });
+        }
+    }
+
+    @Override
+    @Transactional
+    public int createOrder(OmsOrderPayParam omsOrderPayParam) {
+        OmsCompanyAddress omsCompanyAddress = omsOrderPayParam.getAddresses();
+        //下单验证
+        vaildOrderParam(omsOrderPayParam);
         OmsOrder omsOrder = new OmsOrder();
         AtomicReference<Double> totalAmount = new AtomicReference<>(0.0);
         List<OmsWxAppCart> omsWxAppCarts = omsOrderPayParam.getCarts();
-        if (CollectionUtil.isEmpty(omsWxAppCarts)) {
-            Asserts.fail("请选择商品后下单！");
-        }
         //优惠信息
         AllCartDiscountDto allCartDiscountDto = orderCombineManager.queryDiscount(omsWxAppCarts, omsOrderPayParam.getMemberId());
         //计算可获得积分
-
         UmsMember member = umsMemberMapper.selectByPrimaryKey(omsOrderPayParam.getMemberId());
         omsOrder.setMemberId(omsOrderPayParam.getMemberId());
         omsOrder.setCouponId(allCartDiscountDto.getCouponId());
         omsOrder.setOrderSn(String.valueOf(CustomUUID.getInstance(0, 0).generate()));
         omsOrder.setCreateTime(DateUtil.parse(DateUtil.now()));
         omsOrder.setMemberUsername(member.getUsername());
-        omsOrder.setTotalAmount(BigDecimal.valueOf(allCartDiscountDto.getAllMoney()));
-        omsOrder.setPayAmount(BigDecimal.valueOf(allCartDiscountDto.getLastDiscountMoney()));
-        omsOrder.setPromotionAmount(BigDecimal.valueOf(allCartDiscountDto.getPromotionAmount()));
+        omsOrder.setTotalAmount(allCartDiscountDto.getAllMoney());
+        omsOrder.setPayAmount(allCartDiscountDto.getLastDiscountMoney());
+        omsOrder.setPromotionAmount(allCartDiscountDto.getPromotionAmount());
         if (ObjectUtil.isNotNull(allCartDiscountDto.getCouponMoney())) {
-            omsOrder.setCouponAmount(BigDecimal.valueOf(allCartDiscountDto.getCouponMoney()));
+            omsOrder.setCouponAmount(allCartDiscountDto.getCouponMoney());
         }
         omsOrder.setPayType(PayTypeEnum.NOPAY.getKey());
         omsOrder.setSourceType(OrderPaySourceEnum.WECHAT.getKey());
@@ -270,7 +299,28 @@ public class OmsOrderServiceImpl implements OmsOrderService {
         createOrderItemByOrder(omsWxAppCarts, omsOrder);
         //更新商品销量，更新商品库存,更新用户积分
         updateGoodByOrder(omsWxAppCarts, member);
+        if(ObjectUtil.isNotNull(allCartDiscountDto.getCouponId())) {
+            updateCouponOrderHistory(omsOrder);
+        }
         return count;
+    }
+
+    /**
+     * 更新优惠券使用
+     * @param omsOrder
+     */
+    private void updateCouponOrderHistory(OmsOrder omsOrder) {
+        SmsCouponHistoryExample smsCouponHistoryExample = new SmsCouponHistoryExample();
+        smsCouponHistoryExample.or().andCouponIdEqualTo(omsOrder.getCouponId());
+        List<SmsCouponHistory> smsCouponHistories = smsCouponHistoryMapper.selectByExample(smsCouponHistoryExample);
+        if(CollectionUtil.isNotEmpty(smsCouponHistories)) {
+            SmsCouponHistory smsCouponHistory = smsCouponHistories.get(0);
+            smsCouponHistory.setCouponId(omsOrder.getCouponId());
+            smsCouponHistory.setUseStatus(CouponStatusEnum.USED.getKey());
+            smsCouponHistory.setOrderSn(omsOrder.getOrderSn());
+            smsCouponHistory.setMemberNickname(omsOrder.getMemberUsername());
+            smsCouponHistoryMapper.updateByPrimaryKeySelective(smsCouponHistory);
+        }
     }
 
     @Override

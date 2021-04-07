@@ -12,6 +12,8 @@ public class SmsCouponDto extends SmsCoupon {
     private String productCategoryName;
     @JsonFormat(pattern="yyyy-MM-dd",timezone = "GMT+8")
     private Date endTime;
+    @JsonFormat(pattern="yyyy-MM-dd",timezone = "GMT+8")
+    private Date startTime;
     @ApiModelProperty(value = "即将过期 0否 1是")
     private Integer nearExpire;
 }

@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.github.pagehelper.PageHelper;
+import com.google.common.collect.Lists;
 import com.macro.mall.common.exception.ApiException;
 import com.macro.mall.common.util.BeanCopyUtil;
 import com.macro.mall.constant.CommonConstant;
@@ -151,6 +152,7 @@ public class SmsCouponServiceImpl implements SmsCouponService {
     @Override
     public SmsCouponResp listWxCoupon(Integer pageNum, Integer pageSize, String token) {
         SmsCouponResp smsCouponResp = new SmsCouponResp();
+        List<SmsCouponDto> availableCoupons = Lists.newArrayList();
        try {
            Long id = TokenUtil.getIdByToken(token);
            //查询所有的可领取优惠券
@@ -159,8 +161,10 @@ public class SmsCouponServiceImpl implements SmsCouponService {
                    .filter(smsCouponDto -> smsCouponDto.getPublishCount() > smsCouponDto.getReceiveCount()
                            && smsCouponDto.getEndTime().getTime() > new Date().getTime()).collect(Collectors.toList());
            if(CollectionUtil.isNotEmpty(smsCouponDtos)) {
-               smsCouponResp.setAvailableCoupons(smsCouponDtos);
+               availableCoupons = smsCouponDtos;
+
            }
+           smsCouponResp.setAvailableCoupons(availableCoupons);
         } catch (Exception e) {
             e.printStackTrace();
             throw new ApiException(e.getMessage());
@@ -200,6 +204,9 @@ public class SmsCouponServiceImpl implements SmsCouponService {
      */
     @Override
     public SmsCouponResp myCoupon(Long memberId) {
+        List<SmsCouponDto> unUseCoupons = Lists.newArrayList();
+        List<SmsCouponDto> usedCoupons = Lists.newArrayList();
+        List<SmsCouponDto> expireCoupons = Lists.newArrayList();
         SmsCouponResp smsCouponResp = null;
         SmsCouponHistoryExample historyExample = new SmsCouponHistoryExample();
         historyExample.or().andMemberIdEqualTo(memberId);
@@ -224,7 +231,8 @@ public class SmsCouponServiceImpl implements SmsCouponService {
                         }
                         return smsCouponDto;
                     }).collect(Collectors.toList());
-                    smsCouponResp.setUnUseCoupons(smsCouponDtos);
+                    unUseCoupons = smsCouponDtos;
+                    smsCouponResp.setUnUseCoupons(unUseCoupons);
                 }
             }
 
@@ -238,7 +246,8 @@ public class SmsCouponServiceImpl implements SmsCouponService {
                 List<SmsCoupon> smsCoupons = smsCouponMapper.selectByExample(couponExample);
                 if(CollectionUtil.isNotEmpty(smsCoupons)) {
                     List<SmsCouponDto> smsCouponDtos = BeanCopyUtil.transform(smsCoupons, SmsCouponDto.class);
-                    smsCouponResp.setUsedCoupons(smsCouponDtos);
+                    usedCoupons = smsCouponDtos;
+                    smsCouponResp.setUsedCoupons(usedCoupons);
                 }
             }
 
@@ -251,7 +260,8 @@ public class SmsCouponServiceImpl implements SmsCouponService {
             smsCoupons = smsCoupons.stream().filter(smsCoupon -> smsCoupon.getEndTime().before(new Date())).collect(Collectors.toList());
             if(CollectionUtil.isNotEmpty(smsCoupons)) {
                 List<SmsCouponDto> smsCouponDtos = BeanCopyUtil.transform(smsCoupons, SmsCouponDto.class);
-                smsCouponResp.setExpireCoupons(smsCouponDtos);
+                expireCoupons = smsCouponDtos;
+                smsCouponResp.setExpireCoupons(expireCoupons);
             }
 
         }
@@ -280,8 +290,8 @@ public class SmsCouponServiceImpl implements SmsCouponService {
         historyExample.or().andCouponIdEqualTo(couponId).andMemberIdEqualTo(memberId);
         Long count = smsCouponHistoryMapper.countByExample(historyExample);
         Integer perLimit = smsCoupon.getPerLimit();
-        if(perLimit < count) {
-            throw new ApiException("您已经领取该优惠券了，不无法重复领取");
+        if(perLimit <= count) {
+            throw new ApiException("您已经领取该优惠券了，无法重复领取");
         }
     }
 }

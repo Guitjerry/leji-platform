@@ -43,6 +43,9 @@ public class SmsHomeNewProductDto {
     @ApiModelProperty(value = "市场价")
     private BigDecimal originalPrice;
 
+    @ApiModelProperty(value = "销售价格")
+    private BigDecimal price;
+
     @ApiModelProperty(value = "促销类型：0->没有促销使用原价;1->使用促销价；2->使用会员价；3->使用阶梯价格；4->使用满减价格；5->限时购")
     private Integer promotionType;
 

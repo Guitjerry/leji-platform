@@ -252,6 +252,7 @@ public class PmsProductServiceImpl implements PmsProductService {
                 SmsCouponExample smsCouponExample = new SmsCouponExample();
                 smsCouponExample.or().andIdIn(couponIds);
                 List<SmsCoupon> smsCoupons = smsCouponMapper.selectByExample(smsCouponExample);
+                smsCoupons.forEach(smsCoupon -> smsCoupon.setName("满" + smsCoupon.getMinPoint() + "减" + smsCoupon.getAmount()));
                 pmsProductDto.setSmsCouponList(smsCoupons);
             }
 

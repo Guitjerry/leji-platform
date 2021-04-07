@@ -119,6 +119,7 @@
         inner join sms_coupon_history sch on sch.coupon_id= sc.id
         inner join sms_coupon_product_relation scpr on sch.coupon_id = scpr.coupon_id
         where sch.member_id=#{userId}
+        and sch.use_status = 0
         and scpr.product_id in
         <foreach close=")" collection="productIds" item="item" open="(" separator=",">
             #{item}
@@ -128,6 +129,7 @@
         inner join sms_coupon_history sch on sch.coupon_id= sc.id
         inner join sms_coupon_product_category_relation scpc on sch.coupon_id = scpc.coupon_id
         where sch.member_id=#{userId}
+        and sch.use_status = 0
         and scpc.product_category_id in
         <foreach close=")" collection="categoryIds" item="item" open="(" separator=",">
             #{item}
@@ -136,6 +138,7 @@
         select sc.*, '' as cid from sms_coupon sc
         inner join sms_coupon_history sch on sch.coupon_id= sc.id
         where sch.member_id=#{userId}
+          and sch.use_status = 0
         and not exists(select 1 from sms_coupon_product_relation scpr where sch.coupon_id = scpr.coupon_id)
         and not exists(select 1 from sms_coupon_product_category_relation scpc where sch.coupon_id = scpc.coupon_id)
     </select>

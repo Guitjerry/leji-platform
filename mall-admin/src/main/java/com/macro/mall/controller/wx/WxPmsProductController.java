@@ -9,6 +9,7 @@ import com.macro.mall.dto.*;
 import com.macro.mall.model.PmsProduct;
 import com.macro.mall.model.PmsProductCategory;
 import com.macro.mall.service.PmsProductService;
+import com.macro.mall.util.TokenUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,8 +67,10 @@ public class WxPmsProductController {
   @ApiOperation("计算优惠信息")
   @RequestMapping(value = "/queryDiscount", method = RequestMethod.POST)
   @ResponseBody
-  public CommonResult<AllCartDiscountDto> queryDiscount(@RequestBody OmsOrderPayParam omsOrderPayParam) {
-    AllCartDiscountDto allCartDiscountDto = productService.queryDiscount(omsOrderPayParam.getCarts(), omsOrderPayParam.getMemberId());
+  public CommonResult<AllCartDiscountDto> queryDiscount(@RequestHeader("Authorization") String authorization,
+                                                        @RequestBody OmsOrderPayParam omsOrderPayParam) throws Exception {
+    Long id = TokenUtil.getIdByAuthorization(authorization);
+    AllCartDiscountDto allCartDiscountDto = productService.queryDiscount(omsOrderPayParam.getCarts(), id);
     return CommonResult.success(allCartDiscountDto);
   }
 
