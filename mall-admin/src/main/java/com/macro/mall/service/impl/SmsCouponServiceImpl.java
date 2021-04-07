@@ -5,6 +5,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.github.pagehelper.PageHelper;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.macro.mall.common.exception.ApiException;
 import com.macro.mall.common.util.BeanCopyUtil;
 import com.macro.mall.constant.CommonConstant;
@@ -29,6 +30,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -155,13 +157,30 @@ public class SmsCouponServiceImpl implements SmsCouponService {
         List<SmsCouponDto> availableCoupons = Lists.newArrayList();
        try {
            Long id = TokenUtil.getIdByToken(token);
+           SmsCouponHistoryExample historyExample = new SmsCouponHistoryExample();
+           historyExample.or().andMemberIdEqualTo(id);
+           List<SmsCouponHistory> smsCouponHistories = smsCouponHistoryMapper.selectByExample(historyExample);
+           Map<Long, List<SmsCouponHistory>> listMap = CollectionUtil.isNotEmpty(smsCouponHistories) ?
+                   smsCouponHistories.stream().collect(Collectors.groupingBy(SmsCouponHistory::getCouponId)) : Maps.newHashMap();
+
            //查询所有的可领取优惠券
            List<SmsCouponDto> smsCouponDtos =  productRelationDao.listAvailableCoupons(id);
            smsCouponDtos = smsCouponDtos.stream()
                    .filter(smsCouponDto -> smsCouponDto.getPublishCount() > smsCouponDto.getReceiveCount()
                            && smsCouponDto.getEndTime().getTime() > new Date().getTime()).collect(Collectors.toList());
            if(CollectionUtil.isNotEmpty(smsCouponDtos)) {
-               availableCoupons = smsCouponDtos;
+               List<SmsCouponDto> finalSmsCouponDtos = Lists.newArrayList();
+               smsCouponDtos.forEach(smsCouponDto -> {
+                   if(!listMap.containsKey(smsCouponDto.getId())) {
+                       finalSmsCouponDtos.add(smsCouponDto);
+                   }else {
+                       Integer count =  listMap.get(smsCouponDto.getId()).size();
+                       if(smsCouponDto.getPerLimit() > count) {
+                           finalSmsCouponDtos.add(smsCouponDto);
+                       }
+                   }
+               });
+               availableCoupons = finalSmsCouponDtos;
 
            }
            smsCouponResp.setAvailableCoupons(availableCoupons);
@@ -218,21 +237,28 @@ public class SmsCouponServiceImpl implements SmsCouponService {
             List<SmsCouponHistory> unUseCoupon = smsCouponHistories.stream()
                     .filter(smsCouponHistory -> smsCouponHistory.getUseStatus().equals(CouponStatusEnum.UNUSE.getKey())).collect(Collectors.toList());
             if(CollectionUtil.isNotEmpty(unUseCoupon)) {
-                List<Long> unUseCouponIds = unUseCoupon.stream().map(SmsCouponHistory::getCouponId).collect(Collectors.toList());
-                SmsCouponExample couponExample = new SmsCouponExample();
-                couponExample.or().andIdIn(unUseCouponIds);
-                List<SmsCoupon> smsCoupons = smsCouponMapper.selectByExample(couponExample);
+                List<SmsCoupon> smsCoupons = Lists.newArrayList();
+                for(SmsCouponHistory smsCouponHistory: unUseCoupon) {
+                    SmsCoupon smsCoupon = smsCouponMapper.selectByPrimaryKey(smsCouponHistory.getCouponId());
+                    smsCoupons.add(smsCoupon);
+                }
                 if(CollectionUtil.isNotEmpty(smsCoupons)) {
-                   List<SmsCouponDto> smsCouponDtos =  smsCoupons.stream().map(smsCoupon -> {
-                        SmsCouponDto smsCouponDto = BeanCopyUtil.transform(smsCoupon, SmsCouponDto.class);
-                        //3天内为即将到期
-                        if(smsCouponDto.getEndTime().getTime() - new Date().getTime()<= 1000*60*60*24*3) {
-                            smsCouponDto.setNearExpire(CommonConstant.FLAG_YES);
-                        }
-                        return smsCouponDto;
-                    }).collect(Collectors.toList());
-                    unUseCoupons = smsCouponDtos;
-                    smsCouponResp.setUnUseCoupons(unUseCoupons);
+                    smsCoupons = smsCoupons.stream()
+                            .filter(smsCoupon -> smsCoupon.getEndTime().after(new Date())).collect(Collectors.toList());
+                    if(CollectionUtil.isNotEmpty(smsCoupons)) {
+                        List<SmsCouponDto> smsCouponDtos =  smsCoupons.stream().map(smsCoupon -> {
+                            SmsCouponDto smsCouponDto = BeanCopyUtil.transform(smsCoupon, SmsCouponDto.class);
+                            //3天内为即将到期
+                            if(smsCouponDto.getEndTime().getTime() - new Date().getTime()<= 1000*60*60*24*3) {
+                                smsCouponDto.setNearExpire(CommonConstant.FLAG_YES);
+                            }
+                            return smsCouponDto;
+                        }).collect(Collectors.toList());
+                        unUseCoupons = smsCouponDtos;
+                        smsCouponResp.setUnUseCoupons(unUseCoupons);
+                    }
+
+
                 }
             }
 
@@ -240,10 +266,11 @@ public class SmsCouponServiceImpl implements SmsCouponService {
             List<SmsCouponHistory> usedCoupon = smsCouponHistories.stream()
                     .filter(smsCouponHistory -> smsCouponHistory.getUseStatus().equals(CouponStatusEnum.USED.getKey())).collect(Collectors.toList());
             if(CollectionUtil.isNotEmpty(usedCoupon)) {
-                List<Long> unUseCouponIds = usedCoupon.stream().map(SmsCouponHistory::getCouponId).collect(Collectors.toList());
-                SmsCouponExample couponExample = new SmsCouponExample();
-                couponExample.or().andIdIn(unUseCouponIds);
-                List<SmsCoupon> smsCoupons = smsCouponMapper.selectByExample(couponExample);
+                List<SmsCoupon> smsCoupons = Lists.newArrayList();
+                for(SmsCouponHistory smsCouponHistory: usedCoupon) {
+                    SmsCoupon smsCoupon = smsCouponMapper.selectByPrimaryKey(smsCouponHistory.getCouponId());
+                    smsCoupons.add(smsCoupon);
+                }
                 if(CollectionUtil.isNotEmpty(smsCoupons)) {
                     List<SmsCouponDto> smsCouponDtos = BeanCopyUtil.transform(smsCoupons, SmsCouponDto.class);
                     usedCoupons = smsCouponDtos;
@@ -252,11 +279,11 @@ public class SmsCouponServiceImpl implements SmsCouponService {
             }
 
             //已过期
-            List<Long> couponIds = smsCouponHistories.stream()
-                    .map(SmsCouponHistory::getCouponId).collect(Collectors.toList());
-            SmsCouponExample couponExample = new SmsCouponExample();
-            couponExample.or().andIdIn(couponIds);
-            List<SmsCoupon> smsCoupons = smsCouponMapper.selectByExample(couponExample);
+            List<SmsCoupon> smsCoupons = Lists.newArrayList();
+            for(SmsCouponHistory smsCouponHistory: smsCouponHistories) {
+                SmsCoupon smsCoupon = smsCouponMapper.selectByPrimaryKey(smsCouponHistory.getCouponId());
+                smsCoupons.add(smsCoupon);
+            }
             smsCoupons = smsCoupons.stream().filter(smsCoupon -> smsCoupon.getEndTime().before(new Date())).collect(Collectors.toList());
             if(CollectionUtil.isNotEmpty(smsCoupons)) {
                 List<SmsCouponDto> smsCouponDtos = BeanCopyUtil.transform(smsCoupons, SmsCouponDto.class);

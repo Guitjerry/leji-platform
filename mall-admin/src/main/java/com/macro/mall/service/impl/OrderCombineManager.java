@@ -123,8 +123,8 @@ public class OrderCombineManager {
       }
       smsFilterCoupons = smsFilterCoupons.stream().sorted((o1, o2) -> o1.getAmount().compareTo(o2.getAmount()))
         .collect(Collectors.toList());
-      allCartDiscountDto.setCoupons(smsFilterCoupons);
       if (CollectionUtil.isNotEmpty(smsFilterCoupons)) {
+        allCartDiscountDto.setCoupons(Lists.newArrayList(smsFilterCoupons.get(0)));
         allDiscountMoney = allDiscountMoney.add(smsFilterCoupons.get(0).getAmount());
         allCartDiscountDto.setDiscountType(CouponDiscountEnum.COUPON.getKey());
         couponMoney = couponMoney.add(smsFilterCoupons.get(0).getAmount());
