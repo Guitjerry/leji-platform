@@ -37,12 +37,10 @@ public class WxOmsOrderController {
   }
 
   @ApiOperation("查询订单")
-  @RequestMapping(value = "/list", method = RequestMethod.GET)
+  @RequestMapping(value = "/list", method = RequestMethod.POST)
   @ResponseBody
-  public CommonResult<CommonPage<OmsOrder>> list(OmsOrderQueryParam queryParam,
-                                                 @RequestParam(value = "pageSize", defaultValue = "100") Integer pageSize,
-                                                 @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
-    List<OmsOrder> orderList = orderService.list(queryParam, pageSize, pageNum);
+  public CommonResult<CommonPage<OmsOrderDto>> list(@RequestBody OmsOrderQueryParam queryParam) {
+    List<OmsOrderDto> orderList = orderService.listWx(queryParam, queryParam.getPageSize(), queryParam.getPageNum());
     return CommonResult.success(CommonPage.restPage(orderList));
   }
 }

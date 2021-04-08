@@ -75,4 +75,13 @@ public interface OmsOrderService {
   int sendOrder(OmsOrder omsOrder);
 
   void printOrder(Long orderId) throws Exception;
+
+    /**
+     * 微信查询订单
+     * @param queryParam
+     * @param pageSize
+     * @param pageNum
+     * @return
+     */
+  List<OmsOrderDto> listWx(OmsOrderQueryParam queryParam, Integer pageSize, Integer pageNum);
 }

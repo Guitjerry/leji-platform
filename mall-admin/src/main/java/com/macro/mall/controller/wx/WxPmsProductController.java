@@ -74,4 +74,16 @@ public class WxPmsProductController {
     return CommonResult.success(allCartDiscountDto);
   }
 
+  @ApiOperation("创建商品")
+  @RequestMapping(value = "/create", method = RequestMethod.POST)
+  @ResponseBody
+  public CommonResult create(@RequestBody PmsProductParam productParam) {
+    int count = productService.create(productParam);
+    if (count > 0) {
+      return CommonResult.success(count);
+    } else {
+      return CommonResult.failed();
+    }
+  }
+
 }

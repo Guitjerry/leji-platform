@@ -4,8 +4,11 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.github.pagehelper.PageHelper;
+import com.google.common.collect.Lists;
 import com.macro.mall.common.exception.Asserts;
+import com.macro.mall.common.util.BeanCopyUtil;
 import com.macro.mall.common.util.CustomUUID;
 import com.macro.mall.constant.CommonConstant;
 import com.macro.mall.dao.OmsOrderDao;
@@ -29,6 +32,7 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -57,6 +61,8 @@ public class OmsOrderServiceImpl implements OmsOrderService {
     private OmsOrderItemMapper omsOrderItemMapper;
     @Autowired
     private OmsOrderMapper omsOrderMapper;
+    @Autowired
+    private OmsOrderDao omsOrderDao;
     @Autowired
     private PrintCustomer printCustomer;
     @Autowired
@@ -360,6 +366,34 @@ public class OmsOrderServiceImpl implements OmsOrderService {
         CustomerTicketPrint customerTicketPrint = new CustomerTicketPrint(omsOrderPrintDto);
         printCustomer.setCustomerTicketPrint(customerTicketPrint);
         printCustomer.PrintCustomer();
+    }
+
+    @Override
+    public List<OmsOrderDto> listWx(OmsOrderQueryParam queryParam, Integer pageSize, Integer pageNum) {
+       List<OmsOrder> omsOrders = list(queryParam, pageSize, pageNum);
+        List<OmsOrderDto> omsOrderDtos = Lists.newArrayList();
+       if(CollectionUtil.isNotEmpty(omsOrders)) {
+           if(StrUtil.isNotEmpty(queryParam.getKeyWord())) {
+               omsOrders = omsOrders.stream().filter(omsOrder ->
+                       omsOrder.getOrderSn().equals(queryParam.getKeyWord()) || omsOrder.getReceiverPhone().contains(queryParam.getKeyWord())).collect(Collectors.toList());
+           }
+           if(CollectionUtil.isNotEmpty(omsOrders)) {
+               List<Long> orderIds = omsOrders.stream().map(OmsOrder::getId).collect(Collectors.toList());
+               OmsOrderItemExample itemExample = new OmsOrderItemExample();
+               itemExample.or().andOrderIdIn(orderIds);
+               List<OmsOrderItem> items = omsOrderItemMapper.selectByExample(itemExample);
+               if(CollectionUtil.isNotEmpty(items)) {
+                   Map<Long,List<OmsOrderItem>> itemMap = items.stream().collect(Collectors.groupingBy(OmsOrderItem::getOrderId));
+                   omsOrderDtos = omsOrders.stream().map(omsOrder -> {
+                       OmsOrderDto omsOrderDto = BeanCopyUtil.transform(omsOrder, OmsOrderDto.class);
+                       List<OmsOrderItem> itemList = itemMap.get(omsOrder.getId());
+                       omsOrderDto.setItems(itemList);
+                       return omsOrderDto;
+                   }).collect(Collectors.toList());
+               }
+           }
+       }
+       return omsOrderDtos;
     }
 
     private void saveOrderHistory(Long orderId, Integer status, String note) {

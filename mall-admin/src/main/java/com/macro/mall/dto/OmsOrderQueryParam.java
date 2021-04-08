@@ -1,6 +1,7 @@
 package com.macro.mall.dto;
 
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,8 +9,7 @@ import lombok.Setter;
  * 订单查询参数
  * Created by macro on 2018/10/11.
  */
-@Getter
-@Setter
+@Data
 public class OmsOrderQueryParam {
     @ApiModelProperty(value = "订单编号")
     private String orderSn;
@@ -24,4 +24,7 @@ public class OmsOrderQueryParam {
     @ApiModelProperty(value = "订单提交时间")
     private String createTime;
     private Long memberId;
+    private String keyWord;
+    private Integer pageSize;
+    private Integer pageNum;
 }
