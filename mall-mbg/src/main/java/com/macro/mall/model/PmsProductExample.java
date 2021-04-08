@@ -2505,6 +2505,126 @@ public class PmsProductExample {
             addCriterion("product_category_name not between", value1, value2, "productCategoryName");
             return (Criteria) this;
         }
+
+        public Criteria andIsShowIsNull() {
+            addCriterion("is_show is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsShowIsNotNull() {
+            addCriterion("is_show is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsShowEqualTo(Integer value) {
+            addCriterion("is_show =", value, "isShow");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsShowNotEqualTo(Integer value) {
+            addCriterion("is_show <>", value, "isShow");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsShowGreaterThan(Integer value) {
+            addCriterion("is_show >", value, "isShow");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsShowGreaterThanOrEqualTo(Integer value) {
+            addCriterion("is_show >=", value, "isShow");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsShowLessThan(Integer value) {
+            addCriterion("is_show <", value, "isShow");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsShowLessThanOrEqualTo(Integer value) {
+            addCriterion("is_show <=", value, "isShow");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsShowIn(List<Integer> values) {
+            addCriterion("is_show in", values, "isShow");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsShowNotIn(List<Integer> values) {
+            addCriterion("is_show not in", values, "isShow");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsShowBetween(Integer value1, Integer value2) {
+            addCriterion("is_show between", value1, value2, "isShow");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsShowNotBetween(Integer value1, Integer value2) {
+            addCriterion("is_show not between", value1, value2, "isShow");
+            return (Criteria) this;
+        }
+
+        public Criteria andBuyingPriceIsNull() {
+            addCriterion("buying_price is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andBuyingPriceIsNotNull() {
+            addCriterion("buying_price is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andBuyingPriceEqualTo(BigDecimal value) {
+            addCriterion("buying_price =", value, "buyingPrice");
+            return (Criteria) this;
+        }
+
+        public Criteria andBuyingPriceNotEqualTo(BigDecimal value) {
+            addCriterion("buying_price <>", value, "buyingPrice");
+            return (Criteria) this;
+        }
+
+        public Criteria andBuyingPriceGreaterThan(BigDecimal value) {
+            addCriterion("buying_price >", value, "buyingPrice");
+            return (Criteria) this;
+        }
+
+        public Criteria andBuyingPriceGreaterThanOrEqualTo(BigDecimal value) {
+            addCriterion("buying_price >=", value, "buyingPrice");
+            return (Criteria) this;
+        }
+
+        public Criteria andBuyingPriceLessThan(BigDecimal value) {
+            addCriterion("buying_price <", value, "buyingPrice");
+            return (Criteria) this;
+        }
+
+        public Criteria andBuyingPriceLessThanOrEqualTo(BigDecimal value) {
+            addCriterion("buying_price <=", value, "buyingPrice");
+            return (Criteria) this;
+        }
+
+        public Criteria andBuyingPriceIn(List<BigDecimal> values) {
+            addCriterion("buying_price in", values, "buyingPrice");
+            return (Criteria) this;
+        }
+
+        public Criteria andBuyingPriceNotIn(List<BigDecimal> values) {
+            addCriterion("buying_price not in", values, "buyingPrice");
+            return (Criteria) this;
+        }
+
+        public Criteria andBuyingPriceBetween(BigDecimal value1, BigDecimal value2) {
+            addCriterion("buying_price between", value1, value2, "buyingPrice");
+            return (Criteria) this;
+        }
+
+        public Criteria andBuyingPriceNotBetween(BigDecimal value1, BigDecimal value2) {
+            addCriterion("buying_price not between", value1, value2, "buyingPrice");
+            return (Criteria) this;
+        }
     }
 
     public static class Criteria extends GeneratedCriteria {

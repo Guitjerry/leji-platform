@@ -109,6 +109,12 @@ public class PmsProduct implements Serializable {
     @ApiModelProperty(value = "商品分类名称")
     private String productCategoryName;
 
+    @ApiModelProperty(value = "未注册时是否可以看到商品价格")
+    private Integer isShow;
+
+    @ApiModelProperty(value = "进货价")
+    private BigDecimal buyingPrice;
+
     @ApiModelProperty(value = "商品描述")
     private String description;
 
@@ -120,18 +126,7 @@ public class PmsProduct implements Serializable {
     @ApiModelProperty(value = "移动端网页详情")
     private String detailMobileHtml;
 
-    @ApiModelProperty(value = "未注册用户是否可以看到该商品价格 0 看不到 1可以看到")
-    private Integer isShow;
-
     private static final long serialVersionUID = 1L;
-
-    public Integer getIsShow() {
-        return isShow;
-    }
-
-    public void setIsShow(Integer isShow) {
-        this.isShow = isShow;
-    }
 
     public Long getId() {
         return id;
@@ -437,6 +432,22 @@ public class PmsProduct implements Serializable {
         this.productCategoryName = productCategoryName;
     }
 
+    public Integer getIsShow() {
+        return isShow;
+    }
+
+    public void setIsShow(Integer isShow) {
+        this.isShow = isShow;
+    }
+
+    public BigDecimal getBuyingPrice() {
+        return buyingPrice;
+    }
+
+    public void setBuyingPrice(BigDecimal buyingPrice) {
+        this.buyingPrice = buyingPrice;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -513,6 +524,8 @@ public class PmsProduct implements Serializable {
         sb.append(", promotionType=").append(promotionType);
         sb.append(", brandName=").append(brandName);
         sb.append(", productCategoryName=").append(productCategoryName);
+        sb.append(", isShow=").append(isShow);
+        sb.append(", buyingPrice=").append(buyingPrice);
         sb.append(", description=").append(description);
         sb.append(", detailDesc=").append(detailDesc);
         sb.append(", detailHtml=").append(detailHtml);

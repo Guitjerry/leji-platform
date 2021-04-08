@@ -33,8 +33,4 @@ public interface PmsProductMapper {
     int updateByPrimaryKeyWithBLOBs(PmsProduct record);
 
     int updateByPrimaryKey(PmsProduct record);
-
-    List<PmsProduct> listByNewProduct();
-
-    List<PmsProduct> listByTejia();
 }
