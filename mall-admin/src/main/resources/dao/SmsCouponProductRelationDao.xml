@@ -13,6 +13,7 @@
     <select id="listAvailableCoupons" resultType="com.macro.mall.dto.SmsCouponDto">
         select pp.name,
                sc.id,
+               sc.per_limit as perLimit,
                pp.brand_name as brandName,
                pp.product_category_name as productCategoryName,
                sc.name,
@@ -25,7 +26,6 @@
         from sms_coupon_product_relation scpr
                  inner join pms_product pp on scpr.product_id = pp.id
                  inner join sms_coupon sc on scpr.coupon_id = sc.id
-            and not exists(select 1 from sms_coupon_history sch where sch.coupon_id = sc.id and sch.member_id = #{id})
     </select>
 
 </mapper>

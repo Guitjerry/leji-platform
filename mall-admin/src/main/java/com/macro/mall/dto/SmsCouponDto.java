@@ -8,7 +8,10 @@ import java.util.Date;
 
 @Data
 public class SmsCouponDto extends SmsCoupon {
+    private Long id;
     private String brandName;
+    @ApiModelProperty(value = "可领券数量")
+    private Integer perLimit;
     private String productCategoryName;
     @JsonFormat(pattern="yyyy-MM-dd",timezone = "GMT+8")
     private Date endTime;
